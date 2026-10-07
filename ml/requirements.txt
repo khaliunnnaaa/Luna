@@ -1,0 +1,9 @@
+torch
+scikit-learn
+pandas
+numpy
+pytesseract
+pix2tex
+pyBKT
+sympy
+jupyter
