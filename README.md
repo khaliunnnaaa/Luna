@@ -36,6 +36,14 @@ pip install -r requirements-dev.txt && uvicorn app.main:app --reload
 cd frontend && npm install && npm run dev
 ```
 
+## Админ хэрэглэгч үүсгэх
+
+Админ эрхээр сайтаас бүртгүүлэх боломжгүй. `backend` хавтсанд, venv идэвхтэй үед:
+
+```bash
+python -m app.create_admin admin@example.com "НууцҮг123" "Админ"
+```
+
 ## Технологи
 
 Next.js · KaTeX · FastAPI · PostgreSQL · MinIO/S3 · PyTorch · scikit-learn · Tesseract · pix2tex · pyBKT · SymPy · Docker

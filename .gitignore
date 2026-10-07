@@ -33,3 +33,7 @@ data/ocr_images/*
 .DS_Store
 .idea/
 .vscode/
+
+# Локал SQLite сан
+*.db
+*.tsbuildinfo
