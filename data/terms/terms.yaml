@@ -1,9 +1,0 @@
-terms:
-  - term: дискриминант
-    topic: quadratic_eq
-    explanation: "ax²+bx+c=0 тэгшитгэл хэдэн шийдтэйг хэлж өгдөг тоо: D = b² − 4ac."
-    example: "x²−5x+6=0 үед D = 25 − 24 = 1 > 0, тиймээс 2 шийдтэй."
-  - term: логарифм
-    topic: logarithm
-    explanation: "Тоог гаргахын тулд суурийг хэдэн зэрэг дэвшүүлэхийг заана."
-    example: "log₂8 = 3, учир нь 2³ = 8."

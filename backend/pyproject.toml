@@ -1,9 +1,11 @@
 [tool.ruff]
 line-length = 100
-target-version = "py311"
+target-version = "py39"  # Локал Mac дээр Python 3.9
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "UP", "B"]
+# Python 3.9-д нийцүүлэхийн тулд typing.List/Optional хэрэглэхийг зөвшөөрнө
+ignore = ["UP006", "UP035"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

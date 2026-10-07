@@ -8,7 +8,7 @@
 ```
 backend/    FastAPI API (auth, тест, дасгал, хариу шалгагч)
 frontend/   Next.js + KaTeX
-ml/         OCR, сэдэв ангилагч, Knowledge Tracing, санал болгогч
+ml/         ML хэсэг: сэдэв ангилагч, BKT, санал болгогч, OCR + бодлогын сан (ml/csv)
 data/       Сэдвийн граф, нэр томьёоны толь, бодлогын сан
 docs/       Архитектур, хамтран ажиллах дүрэм
 scripts/    Туслах скриптүүд (GitHub issue үүсгэх г.м.)

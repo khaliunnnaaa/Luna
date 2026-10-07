@@ -1,0 +1,63 @@
+source: ASSISTments 2009 (pyBKT as.csv), pyBKT Model(seed=42, num_fits=1, parallel=False)
+trained_on: '2026-10-05'
+n_skills: 110
+test_auc: 0.7237
+note: Манай системд хэрэглэгчийн өгөгдөл одоогоор байхгүй тул ASSISTments-ийн бүх
+  skill-ийн параметрийн медианыг сэдэв бүрт анхны утга болгосон. Хэрэглэгчийн өгөгдөл
+  хуримтлагдсаны дараа сэдэв тус бүрээр дахин сургана.
+default:
+  prior: 0.6673
+  learn: 0.1431
+  guess: 0.1463
+  slip: 0.2316
+topics:
+  T01:
+    prior: 0.6673
+    learn: 0.1431
+    guess: 0.1463
+    slip: 0.2316
+  T02:
+    prior: 0.6673
+    learn: 0.1431
+    guess: 0.1463
+    slip: 0.2316
+  T03:
+    prior: 0.6673
+    learn: 0.1431
+    guess: 0.1463
+    slip: 0.2316
+  T04:
+    prior: 0.6673
+    learn: 0.1431
+    guess: 0.1463
+    slip: 0.2316
+  T05:
+    prior: 0.6673
+    learn: 0.1431
+    guess: 0.1463
+    slip: 0.2316
+  T06:
+    prior: 0.6673
+    learn: 0.1431
+    guess: 0.1463
+    slip: 0.2316
+  T07:
+    prior: 0.6673
+    learn: 0.1431
+    guess: 0.1463
+    slip: 0.2316
+  T08:
+    prior: 0.6673
+    learn: 0.1431
+    guess: 0.1463
+    slip: 0.2316
+  T09:
+    prior: 0.6673
+    learn: 0.1431
+    guess: 0.1463
+    slip: 0.2316
+  T10:
+    prior: 0.6673
+    learn: 0.1431
+    guess: 0.1463
+    slip: 0.2316

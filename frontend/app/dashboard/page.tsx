@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
@@ -42,9 +43,16 @@ export default function DashboardPage() {
         <h1 style={{ marginTop: 12 }}>Сайн уу, {user.full_name}!</h1>
         <p className="subtitle">{user.email}</p>
         <p>Энд удахгүй таны самбар (ахиц, дасгал, бодлого) гарч ирнэ.</p>
-        <button className="btn secondary" onClick={onLogout}>
-          Гарах
-        </button>
+        <div className="stack">
+          {user.role === "admin" && (
+            <Link href="/admin" className="btn">
+              Контент удирдлага
+            </Link>
+          )}
+          <button className="btn secondary" onClick={onLogout}>
+            Гарах
+          </button>
+        </div>
       </div>
     </main>
   );

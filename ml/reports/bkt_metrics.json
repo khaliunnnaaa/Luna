@@ -1,0 +1,44 @@
+{
+  "data": {
+    "rows_raw": 525534,
+    "rows_no_skill": 78690,
+    "rows_duplicate": 121207,
+    "rows": 325637,
+    "students": 4151,
+    "skills": 110,
+    "correct_rate": 0.6584540454555226
+  },
+  "train_rows": 259762,
+  "test_rows": 65875,
+  "train_students": 3320,
+  "test_students": 831,
+  "auc": 0.7237374459233055,
+  "rmse": 0.4352721775985153,
+  "baseline_skill_rate_auc": 0.6272684617696467,
+  "fit_seconds": 359.9522440433502,
+  "median_params": {
+    "prior": 0.6673,
+    "learn": 0.1431,
+    "guess": 0.1463,
+    "slip": 0.2316
+  },
+  "iqr_params": {
+    "prior": [
+      0.5197,
+      0.8008
+    ],
+    "learn": [
+      0.0734,
+      0.3023
+    ],
+    "guess": [
+      0.0469,
+      0.3368
+    ],
+    "slip": [
+      0.1554,
+      0.2922
+    ]
+  },
+  "max_skills": null
+}

@@ -97,3 +97,45 @@ export async function login(email: string, password: string): Promise<User> {
 export function me(): Promise<User> {
   return request<User>("/auth/me");
 }
+
+// ---------- Ерөнхий хүсэлтүүд ----------
+export const api = {
+  get: <T>(path: string) => request<T>(path),
+  post: <T>(path: string, data: unknown) =>
+    request<T>(path, { method: "POST", body: JSON.stringify(data) }),
+  put: <T>(path: string, data: unknown) =>
+    request<T>(path, { method: "PUT", body: JSON.stringify(data) }),
+  del: (path: string) => request<null>(path, { method: "DELETE" }),
+};
+
+// ---------- Контент (FR-16) ----------
+export type Topic = {
+  id: string;
+  name: string;
+  grade: number;
+  description: string | null;
+  prerequisites: string[];
+  problem_count: number;
+};
+
+export type Term = {
+  id: number;
+  term: string;
+  explanation: string;
+  example: string | null;
+  topic_id: string | null;
+};
+
+export type Problem = {
+  id: number;
+  code: string | null;
+  topic_id: string;
+  subtopic: string | null;
+  difficulty: number; // 1–3
+  statement: string;
+  answers: string[];
+  hints: string[];
+  common_mistakes: string | null;
+  terms: string[];
+  source: string | null;
+};

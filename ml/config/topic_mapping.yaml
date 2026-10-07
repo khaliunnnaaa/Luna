@@ -1,0 +1,41 @@
+# MATH (Hendrycks) сэдвийг манай T01–T10 кодтой холбох дүрэм.
+#
+# MATH-ийн нэг сэдэв (жишээ нь algebra) манай олон сэдвийг хамардаг тул сэдвээр нь шууд
+# холбох боломжгүй. Иймд бодлого бүрийн текстэд regex дүрмийг ДАРААЛЛААР шалгаж,
+# эхний таарсан дүрмийн кодыг сул шошго (weak label) болгоно. Аль ч дүрэм таарахгүй бол
+# тухайн бодлогыг хасна (geometry, number_theory-г татахдаа аль хэдийн хассан).
+#
+# Эдгээр шошго нь гараар шалгаагүй, ойролцоо шошго гэдгийг анхаар. Зөвхөн LaTeX шинжийг
+# сургахад туслах зорилготой; үнэлгээ үргэлж бодлогын_сан.xlsx дээр хийгдэнэ.
+
+subjects:
+  counting_and_probability:
+    - {topic: T10, pattern: ".*"}
+
+  precalculus:
+    - {topic: T09, pattern: '\\(sin|cos|tan|cot|sec|csc)\b'}
+    - {topic: T08, pattern: '\\(log|ln)\b'}
+    # вектор, матриц, комплекс тоо зэрэг бусад нь хамрах хүрээнээс гадуур -> хасна
+
+  algebra:
+    - {topic: T08, pattern: '\\(log|ln)\b|logarithm'}
+    - {topic: T07, pattern: '\d\^\{?[a-z]|\^\{[^}]*[a-z][^}]*\}.*=|exponential'}
+    - {topic: T05, pattern: '\\(le|ge|leq|geq|lt|gt)\b|[<>]|inequalit'}
+    - {topic: T04, pattern: '[a-z]\^2|quadratic|\broots?\b'}
+    - {topic: T06, pattern: '\bf\(|\bg\(|function|graph|domain|range|slope'}
+    - {topic: T03, pattern: 'solve|equation|system|=\s*-?\d'}
+    - {topic: T02, pattern: 'simplify|expand|factor|expression'}
+
+  intermediate_algebra:
+    - {topic: T08, pattern: '\\(log|ln)\b|logarithm'}
+    - {topic: T05, pattern: '\\(le|ge|leq|geq|lt|gt)\b|[<>]|inequalit'}
+    - {topic: T04, pattern: '[a-z]\^2\b|quadratic'}
+    - {topic: T06, pattern: '\bf\(|function|graph|domain|range'}
+
+  prealgebra:
+    - {exclude: 'area|perimeter|triangle|angle|circle|square|rectangle|polygon|degrees'}
+    - {topic: T02, pattern: 'simplify|expression|[0-9][a-z]\b|\b[a-z]\s*[+\-]\s*\d'}
+    - {topic: T01, pattern: '\\frac|\^|\\sqrt|\d\s*[+\-*/]\s*\d|\\cdot|\\times|\\div'}
+
+# Сэдэв бүрээс авах дээд хэмжээ (тэнцвэржүүлэх). seed тогтмол.
+max_per_topic: 300

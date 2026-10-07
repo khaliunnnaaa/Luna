@@ -32,3 +32,29 @@ def client(db_session):
     with TestClient(app) as c:
         yield c
     app.dependency_overrides.clear()
+
+
+def _headers_for(client, db_session, email, role):
+    from app.core.security import hash_password
+    from app.models.user import User
+
+    db_session.add(
+        User(email=email, full_name=role.value, password_hash=hash_password("password1"), role=role)
+    )
+    db_session.commit()
+    r = client.post("/auth/login", json={"email": email, "password": "password1"})
+    return {"Authorization": f"Bearer {r.json()['access_token']}"}
+
+
+@pytest.fixture()
+def admin_headers(client, db_session):
+    from app.models.user import Role
+
+    return _headers_for(client, db_session, "admin@test.mn", Role.admin)
+
+
+@pytest.fixture()
+def student_headers(client, db_session):
+    from app.models.user import Role
+
+    return _headers_for(client, db_session, "student@test.mn", Role.student)

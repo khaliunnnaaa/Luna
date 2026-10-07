@@ -1,0 +1,9 @@
+data/raw/
+models/
+state/
+.venv/
+.venv39/
+__pycache__/
+.pytest_cache/
+.DS_Store
+data/
