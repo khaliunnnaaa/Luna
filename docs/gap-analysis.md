@@ -88,4 +88,5 @@
 - Frontend: `components/ProblemSolver.tsx` (нэр томьёо дарах, 3 шатны сануулга, хариу, mastery), `/practice`, `/problems/[id]`, `/dashboard` (эзэмшлийн самбар)
 - Төлөв: FR-05 ✅, FR-06 ✅ (чиглүүлэх асуулт = сануулга 1), FR-08 🟡→✅ (hint/term дохиог BKT-д оруулаагүй), FR-09 ✅, FR-10 ✅, FR-11 🟡 (сэдвээс дасгал сонгох бий, граф зураг байхгүй), FR-12 🟡 (самбар бий, график байхгүй)
 - **FR-02 ✅**: `services/placement.py` + `/placement/*` + `/placement` хуудас. Сэдэв бүрээс 1 асуулт (топологи дараалал, ≤10), 2-р түвшнээс эхэлж зөв/буруугаар ±1; дуусахад сэдэв бүрийн анхны mastery = зөв {1:0.60, 2:0.75, 3:0.90} / буруу {1:0.15, 2:0.30, 3:0.45}; 10 мин хугацаа; migration `0003_placement`
-- Дараагийн: ML сервис + OCR (FR-03/04) → FR-07 ижил төстэй бодлого + solution_steps → FR-12–14
+- OCR: `ml/notebooks/ocr_colab.ipynb` (Colab GPU: шошголох туслах, үнэлгээ, синтетик өгөгдөл, pix2tex fine-tune); `pipeline.py` fine-tune жинг env-ээр ачаалдаг болов
+- Дараагийн: ML сервис + OCR upload endpoint (FR-03/04) → FR-07 ижил төстэй бодлого + solution_steps → FR-12–14

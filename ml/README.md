@@ -106,6 +106,11 @@ brew install tesseract
 Үнэлгээ: `data/own_images/`-д зураг (`.jpg/.png`) ба ижил нэртэй `.tex` файл тавиад
 `python -m ml.ocr.evaluate`. Метрик нь exact match болон normalized edit distance.
 
+**Google Colab дээр** (GPU, fine-tune): `notebooks/ocr_colab.ipynb` — Drive-ийн `capstone_ocr/images/`-ийг
+`data/own_images/` болгон холбож, шошголох ноорог үүсгэх → суурь үнэлгээ → синтетик өгөгдөл →
+pix2tex fine-tune → `capstone_ocr/models/{weights.pth,config.yaml}`. Fine-tune хийсэн жинг локалд
+`PIX2TEX_CHECKPOINT=... PIX2TEX_CONFIG=...` орчны хувьсагчаар `pipeline.py`-д өгнө.
+
 ## Хувилбарын тэмдэглэл
 - `scikit-learn<1.7`, `numpy<2`: pyBKT 1.4.3 нь шинэ хувилбарууд дээр унадаг.
 - pyBKT-ийг `parallel=False`-аар ажиллуулна: macOS дээр multiprocessing pool гацдаг.

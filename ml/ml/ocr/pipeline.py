@@ -13,6 +13,7 @@
 """
 from __future__ import annotations
 
+import os
 import re
 from functools import lru_cache
 from pathlib import Path
@@ -34,8 +35,16 @@ def _require(module: str, hint: str):
 
 @lru_cache(maxsize=1)
 def _latex_model():
+    """pix2tex загвар. Fine-tune хийсэн жин байвал орчны хувьсагчаар зааж өгнө:
+         PIX2TEX_CHECKPOINT=models/pix2tex/weights.pth  PIX2TEX_CONFIG=models/pix2tex/config.yaml
+       (Colab дээр сургасан жинг notebooks/ocr_colab.ipynb Drive-д хадгалдаг.)"""
     _require("pix2tex", "pip install -r requirements-ocr.txt")
     from pix2tex.cli import LatexOCR
+
+    ckpt, cfg = os.environ.get("PIX2TEX_CHECKPOINT"), os.environ.get("PIX2TEX_CONFIG")
+    if ckpt and cfg:
+        from munch import Munch
+        return LatexOCR(Munch({"config": cfg, "checkpoint": ckpt, "no_cuda": False, "no_resize": False}))
     return LatexOCR()
 
 
