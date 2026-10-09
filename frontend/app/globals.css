@@ -198,3 +198,8 @@ body {
 .mastery-row.static:hover { border-color: var(--border); background: transparent; }
 .notice { background: #fff8e6; border: 1px solid #f3dfa6; border-radius: 12px; padding: 14px 16px; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
 .notice .btn { width: auto; padding: 10px 16px; }
+
+/* Зураг оруулах */
+.preview { max-width: 100%; max-height: 320px; border-radius: 10px; border: 1px solid var(--border); margin-top: 12px; display: block; }
+.textarea, .select { padding: 10px 12px; font-size: 15px; border: 1px solid var(--border); border-radius: 10px; background: #fff; font-family: inherit; width: 100%; }
+.textarea { resize: vertical; }

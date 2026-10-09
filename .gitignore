@@ -40,3 +40,6 @@ data/ocr_images/*
 
 # Cowork түр файл
 .luna_sync.tgz
+
+# Локал зургийн хадгалалт (dev)
+backend/uploads/

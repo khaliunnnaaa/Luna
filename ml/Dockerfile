@@ -1,0 +1,13 @@
+# ML сервис: ангилагч + BKT + (сонголттой) OCR. Torch ороогүй — OCR хэрэгтэй бол
+# requirements-ocr.txt-г нэмж суулгасан image ашиглана (доорх тайлбарыг үз).
+FROM python:3.11-slim
+RUN apt-get update && apt-get install -y --no-install-recommends tesseract-ocr && rm -rf /var/lib/apt/lists/*
+WORKDIR /app
+COPY requirements*.txt ./
+RUN pip install --no-cache-dir -r requirements.txt
+# OCR-той хувилбар (torch ~1 GB): --build-arg WITH_OCR=1
+ARG WITH_OCR=0
+RUN if [ "$WITH_OCR" = "1" ]; then pip install --no-cache-dir -r requirements-ocr.txt; fi
+COPY . .
+EXPOSE 8001
+CMD ["uvicorn", "service:app", "--host", "0.0.0.0", "--port", "8001"]

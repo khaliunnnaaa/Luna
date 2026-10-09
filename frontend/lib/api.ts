@@ -230,3 +230,53 @@ export type PlacementAnswer = {
   feedback: string;
   state: PlacementState;
 };
+
+// ---------- Зураг оруулах / ангилах (FR-03, FR-04) ----------
+export type UploadDetail = {
+  id: number;
+  status: "pending" | "done" | "failed";
+  ocr_text: string | null;
+  ocr_latex: string | null;
+  edited_text: string | null;
+  predicted_topic: string | null;
+  topic_name: string | null;
+  ml_available: boolean;
+  message: string;
+  created_at: string;
+};
+
+export type ClassifyResult = {
+  available: boolean;
+  topic_id: string | null;
+  topic_name: string | null;
+  difficulty: number | null;
+  confidence: number | null;
+  subtopics: string[];
+  terms: string[];
+};
+
+export type MlHealth = { available: boolean; classifier: boolean; ocr: boolean };
+
+// multipart — JSON header тавихгүй
+export async function uploadImage(file: File): Promise<UploadDetail> {
+  const fd = new FormData();
+  fd.append("file", file);
+  const token = getToken();
+  let res: Response;
+  try {
+    res = await fetch(`${API_URL}/uploads`, {
+      method: "POST",
+      body: fd,
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
+    });
+  } catch {
+    throw new Error("Сервертэй холбогдож чадсангүй.");
+  }
+  const body = await res.json().catch(() => null);
+  if (!res.ok) throw new Error(errorMessage(body, res.status));
+  return body as UploadDetail;
+}
+
+export function uploadImageUrl(id: number): string {
+  return `${API_URL}/uploads/${id}/image`;
+}

@@ -24,6 +24,7 @@ docker compose up --build
 | Сервис | Хаяг |
 |---|---|
 | Frontend | http://localhost:3000 |
+| ML сервис | http://localhost:8001/docs |
 | API + Swagger | http://localhost:8000/docs |
 | MinIO консол | http://localhost:9001 |
 
@@ -34,6 +35,8 @@ cd backend && python -m venv .venv && source .venv/bin/activate
 pip install -r requirements-dev.txt && uvicorn app.main:app --reload
 
 cd frontend && npm install && npm run dev
+
+cd ml && .venv/bin/uvicorn service:app --port 8001     # OCR/ангилал (байхгүй бол гараар бичих горим)
 ```
 
 ## Админ хэрэглэгч үүсгэх
@@ -67,11 +70,12 @@ PostgreSQL (Docker) дээр зөвхөн Alembic ашиглана.
 | learning | `GET /problems/{id}` (хариу, сануулгагүй), `GET /problems/{id}/hints/{1..3}` | FR-06 |
 | learning | `POST /problems/{id}/attempt` → зөв/буруу, алдааны төрөл, mastery өмнө/дараа | FR-10, FR-08 |
 | placement | `GET /placement`, `POST /placement/start`, `POST /placement/answer`, `POST /placement/finish` — 8–10 асуулт, adaptive, ≤10 мин | FR-02 |
+| uploads | `POST /uploads` (зураг → OCR → ангилал), `PUT /uploads/{id}` (засах), `GET /uploads/{id}/image`, `DELETE`, `POST /classify`, `GET /ml/health` | FR-03, FR-04 |
 | learning | `GET /next`, `GET /next?topic_id=T04` → санал болгосон дасгал + шалтгаан | FR-09, FR-11 |
 | learning | `POST /term-clicks`, `GET /me/mastery`, `GET /me/attempts` | FR-05, FR-08 |
 
 Frontend хуудсууд: `/dashboard` (сэдвийн эзэмшил, статистик), `/practice` (санал болгосон дасгал),
-`/practice?topic=T04` (сонгосон сэдвээс), `/problems/{id}` (тодорхой бодлого), `/placement` (түвшин тогтоох тест).
+`/practice?topic=T04` (сонгосон сэдвээс), `/problems/{id}` (тодорхой бодлого), `/placement` (түвшин тогтоох тест), `/upload` (зураг оруулах).
 
 ## Технологи
 

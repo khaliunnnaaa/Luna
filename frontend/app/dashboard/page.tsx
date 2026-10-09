@@ -84,9 +84,14 @@ export default function DashboardPage() {
                 Систем таны мэдэхгүй байгаа ойлголтоос эхлэн тохирох бодлого санал болгоно.
               </p>
             </div>
-            <Link href="/practice" className="btn">
-              Бодож эхлэх →
-            </Link>
+            <div className="stack" style={{ minWidth: 200 }}>
+              <Link href="/practice" className="btn">
+                Бодож эхлэх →
+              </Link>
+              <Link href="/upload" className="btn secondary">
+                📷 Бодлогын зураг оруулах
+              </Link>
+            </div>
           </div>
 
           <div className="stats">

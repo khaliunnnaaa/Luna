@@ -102,7 +102,9 @@ def test_start_is_idempotent_and_finish_early(client, student_headers, bank):
     b = client.post("/placement/start", headers=student_headers).json()
     assert a["question"]["problem_id"] == b["question"]["problem_id"]
     pid = a["question"]["problem_id"]
-    client.post("/placement/answer", json={"problem_id": pid, "answer": "1"}, headers=student_headers)
+    client.post(
+        "/placement/answer", json={"problem_id": pid, "answer": "1"}, headers=student_headers
+    )
     st = client.post("/placement/finish", headers=student_headers).json()
     assert st["status"] == "done" and len(st["result"]) == 1
     # Дахин эхлүүлбэл шинэ тест

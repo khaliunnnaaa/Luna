@@ -19,5 +19,17 @@ class Settings(BaseSettings):
     # BKT параметр (ML хэсэг сургасан). Байхгүй бол services/mastery.py-ийн анхдагч утга.
     bkt_params_path: str = str(_ROOT / "ml" / "config" / "bkt_params.yaml")
 
+    # ML сервис (ml/service.py). Хоосон/холбогдохгүй бол OCR, ангилалгүй гараар бичнэ (NFR-07).
+    ml_service_url: str = "http://localhost:8001"
+    ml_timeout_seconds: float = 20.0
+
+    # Зураг хадгалах: S3/MinIO тохируулсан бол тийшээ, үгүй бол локал хавтас (dev).
+    s3_endpoint: str = ""
+    s3_access_key: str = ""
+    s3_secret_key: str = ""
+    s3_bucket: str = "uploads"
+    upload_dir: str = str(_ROOT / "backend" / "uploads")
+    max_upload_bytes: int = 10 * 1024 * 1024
+
 
 settings = Settings()

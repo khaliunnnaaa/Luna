@@ -11,6 +11,7 @@ from app.models.user import Role, User
 from app.schemas.auth import LoginIn, RegisterIn, TokenOut, UserOut
 
 router = APIRouter(prefix="/auth", tags=["auth"])
+_admin = require_role(Role.admin)
 
 
 def _token_for(user: User) -> TokenOut:
@@ -52,6 +53,6 @@ def me(user: User = Depends(get_current_user)) -> User:
 
 
 @router.get("/admin-only", response_model=UserOut, include_in_schema=False)
-def admin_only(user: User = Depends(require_role(Role.admin))) -> User:
+def admin_only(user: User = Depends(_admin)) -> User:
     """Эрхийн шалгалт ажиллаж байгааг тестлэх зориулалттай."""
     return user

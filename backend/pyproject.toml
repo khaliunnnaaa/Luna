@@ -7,6 +7,10 @@ select = ["E", "F", "I", "UP", "B"]
 # Python 3.9-д нийцүүлэхийн тулд typing.List/Optional хэрэглэхийг зөвшөөрнө
 ignore = ["UP006", "UP035"]
 
+[tool.ruff.lint.flake8-bugbear]
+# FastAPI-ийн Depends/Query/File нь default аргумент дээр дуудагдах ёстой — B008-оос чөлөөлнө
+extend-immutable-calls = ["fastapi.Depends", "fastapi.Query", "fastapi.File", "fastapi.Body", "fastapi.Form"]
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 pythonpath = ["."]

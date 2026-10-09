@@ -68,6 +68,9 @@ ID, код бүгд ML хэсэгтэй нийцдэг (T01-001 … бодлог
   - `GET /next[?topic_id=]` — FR-09 санал болгогч (`services/recommender.py`), FR-11 сэдэв сонгох
   - `GET /terms`, `POST /term-clicks` — FR-05; `GET /me/mastery`, `GET /me/attempts`
 - `placement.py` FR-02: `GET /placement`, `POST /placement/{start,answer,finish}`.
+- `uploads.py` FR-03/04: `POST /uploads` (multipart jpg/png ≤10MB → storage → ML /ocr → /classify),
+  `PUT /uploads/{id}` засаад дахин ангилах, `GET /uploads/{id}/image` зөвхөн эзэмшигч, `DELETE` (NFR-06),
+  `POST /classify {text}`, `GET /ml/health`. ML унтарсан бол status=failed + гараар бичих (NFR-07).
 
 ## Сервисүүд (backend/app/services/)
 
@@ -81,6 +84,8 @@ ID, код бүгд ML хэсэгтэй нийцдэг (T01-001 … бодлог
 - `recommender.py` — prerequisite топологи → нээлттэй сэдэв (урьдач бүгд ≥0.95, өөрөө <0.95) →
   mastery→түвшин (<0.5→1, <0.8→2, бусад→3) → бодоогүй бодлого түрүүлнэ; бүгд эзэмшигдсэн бол давтлага.
   Сурагчийн анги (grade) одоогоор тооцдоггүй (User-д grade багана байхгүй) — ML хувилбараас ялгаатай.
+- `ml_client.py` — `settings.ml_service_url` (default localhost:8001, docker: http://ml:8001); алдаа → None.
+- `storage.py` — `S3_ENDPOINT` тохируулсан бол MinIO/S3 (boto3), үгүй бол `backend/uploads/` (gitignore).
 - `placement.py` — сэдэв бүрээс 1 асуулт (≤10, топологи дараалал), 2-р түвшнээс эхэлж зөв/буруугаар ±1,
   "мэдэхгүй" = хоосон хариу, 10 мин. Дуусахад анхны mastery: зөв {1:.60, 2:.75, 3:.90}, буруу {1:.15, 2:.30, 3:.45}.
   Placement-ийн хариулт `attempts`-д орохгүй (BKT давхар тоолохгүй).
@@ -110,7 +115,7 @@ ID, код бүгд ML хэсэгтэй нийцдэг (T01-001 … бодлог
 ## Хийгдсэн (2026-10-09 байдлаар)
 
 FR-01 ✅ FR-02 ✅ FR-05 ✅ FR-06 ✅ FR-08 ✅ FR-09 ✅ FR-10 ✅ FR-11 🟡 (сэдэв сонгох бий, граф зураг үгүй)
-FR-12 🟡 (самбар бий, график үгүй) FR-16 ✅. FR-03/04 🟡 — ML код бэлэн (`ml/`), backend-д холбоогүй.
+FR-12 🟡 (самбар бий, график үгүй) FR-16 ✅. FR-03 ✅ (OCR нарийвчлал хэмжээгүй) FR-04 ✅ — `ml/service.py` HTTP сервис (8001), backend `services/ml_client.py` + `api/uploads.py`, frontend `/upload`.
 FR-07, FR-13, FR-14, FR-15 ❌. Дэлгэрэнгүй: docs/gap-analysis.md.
 
 Бодлогын сан: 200 (сэдэв бүрт 20) — `ml/tools/bank_data.py` (60) + `bank_data_extra.py` (140),
@@ -125,8 +130,7 @@ pix2tex fine-tune; fine-tune жинг `PIX2TEX_CHECKPOINT`/`PIX2TEX_CONFIG` env-
 ## Дараагийн алхмууд (санал болгосон дараалал)
 
 1. `python -m app.seed` + `ml.classifier.train` (200 бодлого) → шинэ метрик
-2. ML сервис: `ml/api.py`-г жижиг FastAPI болгож docker-compose-д `ml` сервис; backend `/classify`,
-   `/ocr` (uploads хүснэгт, MinIO) + зураг оруулах UI (FR-03/04), ML унтарсан үед гараар бичих fallback (NFR-07)
+2. ~~ML сервис + /uploads~~ ✅ (2026-10-09). Үлдсэн: OCR-ийн бодит нарийвчлал (Colab), pix2tex жинг ml сервист өгөх
 3. FR-07 ижил төстэй бодлого — `subtopic_knn` + solution_steps өгөгдөл (одоо байхгүй, бэлтгэх)
 4. FR-12 график, FR-13 badge/streak, FR-14 эцэг эх (parent_child_links бэлэн)
 5. User.grade багана → recommender-т ангийн давуу эрэмбэ (ML хувилбартай адил)
