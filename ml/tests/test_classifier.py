@@ -7,10 +7,10 @@ from ml.common import COL_DIFFICULTY, COL_TOPIC, load_bank
 
 def test_bank_loads_without_empty_rows():
     bank = load_bank()
-    assert len(bank) == 60
+    assert len(bank) == 200  # 2026-10-09: сэдэв бүрт 20
     assert bank["input"].str.len().min() > 0
     assert set(bank[COL_DIFFICULTY]) == {1, 2, 3}
-    assert bank[COL_TOPIC].value_counts().eq(6).all()
+    assert bank[COL_TOPIC].value_counts().eq(20).all()
 
 
 def test_latex_features_language_independent():

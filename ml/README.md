@@ -120,7 +120,7 @@ pix2tex fine-tune → `capstone_ocr/models/{weights.pth,config.yaml}`. Fine-tune
 | Файл | Агуулга |
 |---|---|
 | `dataset_catalog.xlsx` | 15 нээлттэй dataset: ML бүрэлдэхүүн, хэмжээ, лиценз, линк, татах арга |
-| `бодлогын_сан.xlsx` | 60 монгол бодлого (10 сэдэв × 3 түвшин), 3 шаттай сануулга, түгээмэл алдаа, сэдвийн граф, 32 нэр томьёо |
+| `бодлогын_сан.xlsx` | 200 монгол бодлого (10 сэдэв × 20, 3 түвшин), 3 шаттай сануулга, түгээмэл алдаа, сэдвийн граф, 32 нэр томьёо |
 | `csv/` | Бодлогын сан CSV хэлбэрээр (PostgreSQL руу оруулахад) |
 | `download.py` | Каталогийн "Автомат" dataset-уудыг `data/raw/` руу татна (ML хэсэг үүнийг ашиглана) |
 | `download_datasets.py` | Хуучин хувилбар: `data/classifier/` гэх мэт хавтас руу CSV-ээр татна |
@@ -129,5 +129,5 @@ pix2tex fine-tune → `capstone_ocr/models/{weights.pth,config.yaml}`. Fine-tune
 Каталогт "Гараар" гэсэн dataset-уудад бүртгэл (Kaggle, DataShop, TC11) хэрэгтэй.
 
 ### Бодлого нэмэх
-`tools/bank_data.py` дахь `P` жагсаалтад шинэ мөр нэмээд `python3 tools/build_bank.py` ажиллуул.
+`tools/bank_data_extra.py` дахь `P_EXTRA` жагсаалтад шинэ мөр нэмээд (эхний 60 нь `bank_data.py`-д) `python3 tools/build_bank.py` ажиллуул.
 Энэ нь хариуг SymPy-аар шалгаж, Excel/CSV-г дахин үүсгэнэ. Дараа нь ангилагчийг дахин сургана.
