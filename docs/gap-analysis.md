@@ -1,0 +1,91 @@
+# Шаардлага ↔ код: зөрүүний шинжилгээ (gap analysis)
+
+Огноо: 2026-10-09. Эх баримт: «Математик сурахад туслах ухаалаг веб систем — Системийн ерөнхий шаардлага ба цар хүрээ».
+Код: `main` салбар, 3 commit (`fe4789c`, `9d2c15c`, `1003e82`).
+
+Тэмдэглэгээ: ✅ хийгдсэн · 🟡 хэсэгчлэн (суурь нь бий, холбоогүй) · ❌ эхлээгүй
+
+## 1. Функциональ шаардлага
+
+| ID | Шаардлага | Эрэмбэ | Төлөв | Юу байгаа | Юу дутуу |
+|---|---|---|---|---|---|
+| FR-01 | Бүртгэл ба нэвтрэлт | Must | ✅ | `backend/app/api/auth.py` (register/login/me, argon2, JWT), `require_role`, frontend login/register, тест 108 мөр | Эцэг эх ↔ хүүхэд холбоос (`parent_child_links`) байхгүй — FR-14-д хэрэгтэй |
+| FR-02 | Түвшин тогтоох богино adaptive тест | Must | ❌ | Бодлогын сан (60 бодлого, 1–3 түвшин), BKT `prior` параметр | `placement` endpoint, 8–10 асуулт сонгох adaptive логик, үр дүнг mastery-ийн анхны утга болгох, frontend хуудас |
+| FR-03 | Бодлогын зураг оруулах + OCR + засварлах | Must | 🟡 | `ml/ocr/pipeline.py` (Tesseract mon + pix2tex), `recognize_image()` API; MinIO docker-д, `boto3` requirements-д | Tesseract/torch суугаагүй, бодит зураг дээр туршаагүй; backend upload endpoint, S3 хадгалалт, `uploads` хүснэгт, камер/файл UI, OCR үр дүн засах дэлгэц, устгах боломж (NFR-06) |
+| FR-04 | Бодлогын сэдэв ангилах | Must | 🟡 | `ml/classifier` — сэдэв macro-F1 **0.907** (NFR-05 ≥0.80 ✅), `classify_problem()` | Backend-д `/classify` endpoint байхгүй; ML venv backend venv-ээс тусдаа (python 3.11 vs 3.10/3.11), дуудах механизм (import vs тусдаа сервис) шийдэгдээгүй |
+| FR-05 | Нэр томьёо тайлбарлах + дарсан үгийг бүртгэх | Must | 🟡 | `terms` хүснэгт (32 нэр томьёо), `Problem.terms` жагсаалт, админ CRUD | Нийтэд нээлттэй `GET /terms`, сурагчийн дэлгэц дээр үгийг тодруулж дарах UI, `term_clicks` хүснэгт |
+| FR-06 | Алхамчилсан зааварчилгаа, 3 шатны hint | Must | 🟡 | `Problem.hints` (3 хүртэл), бодлогын сангийн бүх 60 бодлогод 3 сануулга бий | Бодлого бодох дэлгэц, hint-ийг шатлан нээх API (`attempts`, `hints_used`), чиглүүлэх асуулт |
+| FR-07 | Ижил төстэй бодлогоор тайлбарлах | Must | 🟡 | `subtopic_knn.joblib` (ойрын бодлого олох, top-3 = 1.0), `solution_steps` хүснэгт архитектурт бичигдсэн | Бодлогын санд **алхамчилсан бодолт** (solution_steps) өгөгдөл байхгүй; ижил төстэй бодлого сонгох endpoint, UI |
+| FR-08 | Мэдлэгийн цоорхой тодорхойлох | Must | 🟡 | BKT (`mastery.py`, AUC **0.7237** ✅), `update_mastery()`, prerequisite граф | Төлөв JSON файлд (`state/students/`) — DB-д `mastery` хүснэгт болгож `StudentStore`-ийг өвлөх; hint ашиглалт + term_clicks-ийг цоорхойд тооцдоггүй (зөвхөн зөв/буруу) |
+| FR-09 | Түвшинд тохирсон дасгал санал болгох | Must | 🟡 | `ml/recommender/recommend.py` (prereq топологи + mastery → түвшин), `recommend_next()` | Backend endpoint, frontend "дараагийн дасгал" дэлгэц |
+| FR-10 | Хариу шалгах (SymPy эквивалент) | Must | 🟡 | `services/answer_checker.py` — бүрэн, тестэй (илэрхийлэл, жагсаалт, цэг, систем, завсар) | `POST /problems/{id}/attempt` endpoint, `attempts` хүснэгт, **алдааны төрөл тэмдэглэх** хэсэг (`common_mistakes` багана байгаа ч харьцуулдаггүй) |
+| FR-11 | Сэдвийн уялдаа холбооны зам | Should | 🟡 | `GET /topics` (prereq-тэй), цикл шалгагч, граф 11 ирмэг | Сурагчийн хуудсанд граф/зам харуулах UI, сэдэв сонгох |
+| FR-12 | Ахицын самбар | Should | ❌ | dashboard хуудас зөвхөн нэр харуулдаг | mastery/attempt статистик endpoint, график |
+| FR-13 | Оноо, badge, streak | Should | ❌ | архитектурт хүснэгтийн нэр | бүгд |
+| FR-14 | Эцэг эхийн самбар | Should | ❌ | `parent` role бий | холбоос, самбар, зөвлөмж |
+| FR-15 | Оноон жагсаалт | Could | ❌ | — | бүгд (сүүлд) |
+| FR-16 | Контент удирдлага (админ) | Must | ✅ | Сэдэв/нэр томьёо/бодлого CRUD, цикл шалгалт, SymPy хариу шалгалт, 3 админ хуудас, тест 195 мөр, `seed.py` | Зөвхөн нэг бодлогод олон хариу (`answers`) UI дээр хэр тохиромжтойг шалгах |
+
+**Дүгнэлт:** Must 10-аас ✅ 2 (FR-01, FR-16), 🟡 7, ❌ 1 (FR-02). Сурагчийн гол урсгал
+(бодлого харах → hint → хариу → mastery → дараагийн дасгал) **бүхэлдээ backend endpoint болон
+сурагчийн UI-гүй**. ML хэсгийн суурь нь бэлэн боловч backend-тэй огт холбогдоогүй.
+
+## 2. Функциональ бус шаардлага
+
+| ID | Төлөв | Тайлбар |
+|---|---|---|
+| NFR-01 Энгийн дизайн | 🟡 | Admin UI бий; сурагчийн UI байхгүй тул үнэлэх боломжгүй |
+| NFR-02 Хурд (OCR ≤5с) | ❌ | OCR хэмжээгүй; pix2tex CPU дээр 5с-д багтах эсэх тодорхойгүй |
+| NFR-03 Responsive, камер | ❌ | Mobile layout, `<input capture="environment">` байхгүй |
+| NFR-04 Монгол хэл | ✅ | UI, алдааны мессеж, код тайлбар бүгд монгол |
+| NFR-05 ML нарийвчлал | 🟡 | Сэдэв 0.907 ✅, BKT AUC 0.724 ✅, **OCR ≥85% хэмжээгүй** (зураг 0/300), түвшин ангилагч 0.41 сул |
+| NFR-06 Аюулгүй байдал | 🟡 | argon2 hash ✅, JWT ✅; HTTPS (deploy-д), зураг устгах, хүүхдийн мэдээлэл хамгийн бага — `full_name`+email л авдаг ✅ |
+| NFR-07 ML-гүй ажиллах | 🟡 | Гараар бодлого бичих/сангаас сонгох UI байхгүй; ML дуудлагад fallback бичигдээгүй |
+| NFR-08 Өргөтгөх | ✅ | Topic ID чөлөөт, контент CSV/админаар нэмэгдэнэ |
+
+## 3. Техникийн зөрүү / эрсдэл
+
+1. **ML ↔ backend холболт шийдэгдээгүй.** `ml/` нь тусдаа venv (numpy<2, sklearn<1.7, torch),
+   backend нь fastapi/sympy. Хоёр сонголт: (а) backend-д `ml`-ийг import хийж нэг процесс —
+   хялбар, гэхдээ torch backend image-д орно; (б) `ml/api.py`-г жижиг FastAPI сервис болгож
+   docker-compose-д `ml` сервис нэмэх — архитектурын зурагтай (`API → ML service`) таарна, NFR-07
+   fallback хийхэд амар. **Санал: (б).**
+2. **Сурагчийн төлөв JSON файлд** (`ml/state/students/`). DB-д `mastery`, `attempts` хүснэгт
+   нэмж `StudentStore`-ийг өвлөх. Docker-т JSON файл volume-гүй бол алга болно.
+3. **Alembic migration байхгүй** — `create_all` ашиглаж байна. Хүснэгт нэмэхээс өмнө Alembic
+   эхлүүлбэл дараагийн 8 хүснэгтийг цэгцтэй нэмнэ.
+4. **OCR өгөгдөл 0.** Шаардлага ≥300 зураг + LaTeX хос. Хамгийн урт хугацаа шаардах ажил —
+   эрт эхлүүлэх.
+5. **Бодлогын сан 60** (сэдэв бүрт 6). FR-02 adaptive тест + FR-09 санал болгогч + FR-07 ижил
+   төстэй бодлого бүгд нэг сангаас татна — сурагч хурдан дуусгана. ML CLAUDE.md-д ч сэдэв бүрт
+   ≥30 гэж тэмдэглэсэн.
+6. **Алхамчилсан бодолт (solution_steps) өгөгдөлгүй** — FR-07-д заавал хэрэгтэй, гараар бичих
+   эсвэл LLM-ээр үүсгээд багш шалгуулах.
+7. `backend/dev.db`, `.pytest_cache`, `__pycache__` repo-д commit-лагдсан эсэхийг шалгах
+   (`.gitignore`-д байгаа боловч ажлын хавтсанд байна).
+
+## 4. Санал болгож буй дараалал (2-р үеэс үргэлжлүүлэх)
+
+| # | Ажил | FR | Шалтгаан |
+|---|---|---|---|
+| 1 | Alembic + `attempts`, `mastery`, `uploads`, `term_clicks`, `parent_child_links` хүснэгт | суурь | Дараагийн бүх FR-д хэрэгтэй |
+| 2 | `POST /problems/{id}/attempt` (SymPy шалгалт + BKT update + алдааны төрөл) | FR-10, FR-08 | answer_checker, mastery.py бэлэн — зөвхөн холбох |
+| 3 | `GET /next` санал болгогч + сурагчийн **бодлого бодох дэлгэц** (statement, hint 3 шат, хариу оруулах, нэр томьёо дарах) | FR-09, FR-06, FR-05 | Сурагчийн гол урсгал анх удаа ажиллана — demo хийх боломжтой |
+| 4 | FR-02 түвшин тогтоох тест (8–10 асуулт, сэдэв бүрээс 1, mastery анхны утга) | FR-02 | Ганц ❌ Must; BKT prior 0.667 өндөр асуудлыг ч шийднэ |
+| 5 | ML сервис (docker) + `/classify`, `/ocr` + зураг upload UI | FR-03, FR-04 | 3-р үе |
+| 6 | Ижил төстэй бодлого + solution_steps | FR-07 | Өгөгдөл бэлтгэх шаардлагатай |
+| 7 | Ахицын самбар, badge/streak, эцэг эх | FR-12–14 | 5-р үе |
+
+Эхний 4 алхам хийгдвэл Must шаардлагын 8/10 нь ажиллах төлөвт орно.
+
+## 5. Явц
+
+**2026-10-09** — 1, 2, 3-р алхам хийгдэв (commit хийгээгүй):
+- Alembic (`0001_initial`, `0002_learning_tables`), `attempts` / `mastery` / `term_clicks` / `uploads` / `parent_child_links` хүснэгт
+- `services/mastery.py` (BKT, `ml/config/bkt_params.yaml`-аас параметр), `services/recommender.py` (DB дээрх санал болгогч)
+- `answer_checker.check_answer` — алдааны төрөл (empty / unparsable / sign_error / partial / wrong)
+- API: `GET /problems/{id}`, `GET /problems/{id}/hints/{n}`, `POST /problems/{id}/attempt`, `GET /next`, `GET /terms`, `POST /term-clicks`, `GET /me/mastery`, `GET /me/attempts`
+- Frontend: `components/ProblemSolver.tsx` (нэр томьёо дарах, 3 шатны сануулга, хариу, mastery), `/practice`, `/problems/[id]`, `/dashboard` (эзэмшлийн самбар)
+- Төлөв: FR-05 ✅, FR-06 ✅ (чиглүүлэх асуулт = сануулга 1), FR-08 🟡→✅ (hint/term дохиог BKT-д оруулаагүй), FR-09 ✅, FR-10 ✅, FR-11 🟡 (сэдвээс дасгал сонгох бий, граф зураг байхгүй), FR-12 🟡 (самбар бий, график байхгүй)
+- **FR-02 ✅**: `services/placement.py` + `/placement/*` + `/placement` хуудас. Сэдэв бүрээс 1 асуулт (топологи дараалал, ≤10), 2-р түвшнээс эхэлж зөв/буруугаар ±1; дуусахад сэдэв бүрийн анхны mastery = зөв {1:0.60, 2:0.75, 3:0.90} / буруу {1:0.15, 2:0.30, 3:0.45}; 10 мин хугацаа; migration `0003_placement`
+- Дараагийн: ML сервис + OCR (FR-03/04) → FR-07 ижил төстэй бодлого + solution_steps → FR-12–14

@@ -136,3 +136,65 @@ body {
   .form { grid-template-columns: 1fr; }
   .item { flex-direction: column; }
 }
+
+/* ---------- Сурагч ---------- */
+.student { max-width: 760px; margin: 0 auto; padding: 24px 16px 64px; }
+.student-top { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 18px; }
+.student-top h1 { margin: 0; font-size: 22px; }
+.student h2 { margin: 0 0 6px; font-size: 18px; }
+.card.wide { max-width: none; margin-bottom: 16px; padding: 24px; }
+.cta { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+.cta .btn { width: auto; padding: 13px 22px; }
+.link { background: none; border: none; color: var(--primary); font-weight: 600; cursor: pointer; text-decoration: none; padding: 0; font-size: 14px; }
+
+.stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 16px; }
+.stat { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 14px; display: flex; flex-direction: column; align-items: center; gap: 2px; }
+.stat-num { font-size: 26px; font-weight: 700; color: var(--primary); }
+
+.mastery-list { list-style: none; margin: 12px 0 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.mastery-row { display: grid; grid-template-columns: 1fr 140px 48px; align-items: center; gap: 12px; padding: 10px 12px; border: 1px solid var(--border); border-radius: 10px; text-decoration: none; color: inherit; }
+.mastery-row:hover { border-color: var(--primary); background: #f6f7ff; }
+.mastery-name { display: flex; flex-direction: column; gap: 2px; font-weight: 600; }
+.mastery-pct { text-align: right; font-weight: 600; font-size: 14px; }
+.bar { height: 8px; background: #e9ebf5; border-radius: 999px; overflow: hidden; }
+.bar-fill { height: 100%; background: var(--primary); border-radius: 999px; transition: width .4s; }
+.bar-fill.done { background: #1f9d55; }
+@media (max-width: 520px) {
+  .mastery-row { grid-template-columns: 1fr 64px 44px; }
+  .stats { grid-template-columns: 1fr 1fr 1fr; }
+}
+
+/* Бодлого бодох */
+.solver { display: flex; flex-direction: column; gap: 14px; }
+.solver-head { display: flex; gap: 8px; flex-wrap: wrap; }
+.badge.muted { background: #f0f1f6; color: var(--muted); }
+.badge.ok { background: #e6f6ec; color: #1f9d55; }
+.reason { margin: 0; padding: 10px 12px; background: #fff8e6; border: 1px solid #f3dfa6; border-radius: 10px; font-size: 14px; }
+.statement { font-size: 20px; line-height: 1.6; }
+.statement .katex { font-size: 1.1em; }
+.term { background: none; border: none; padding: 0; font: inherit; color: var(--primary); border-bottom: 1px dashed var(--primary); cursor: pointer; }
+.term:hover { background: #eef0ff; }
+.term-box { background: #eef0ff; border-radius: 10px; padding: 12px 14px; font-size: 15px; }
+.term-box p { margin: 6px 0; }
+.hints { margin: 0; padding-left: 20px; display: flex; flex-direction: column; gap: 6px; background: #f7f8fc; border: 1px solid var(--border); border-radius: 10px; padding: 12px 12px 12px 32px; }
+.answer-form .field { margin-bottom: 12px; }
+.answer-form .btn { width: auto; padding: 12px 24px; }
+.btn.small { width: auto; align-self: flex-start; }
+.result { border-radius: 10px; padding: 14px; border: 1px solid; }
+.result.ok { background: #e6f6ec; border-color: #b7e4c7; }
+.result.bad { background: var(--error-bg); border-color: #f1b5b0; }
+.result-text { margin: 0 0 6px; font-weight: 600; font-size: 16px; }
+.result .btn { width: auto; }
+
+/* Түвшин тогтоох тест */
+.placement-top { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.timer { margin-left: auto; font-weight: 700; font-variant-numeric: tabular-nums; }
+.timer.warn { color: var(--error); }
+.placement-feedback { margin: 0 0 12px; padding: 8px 12px; border-radius: 8px; background: #f0f1f6; font-size: 14px; }
+.placement-feedback.ok { background: #e6f6ec; color: #1f6b3a; }
+.row { display: flex; gap: 10px; flex-wrap: wrap; }
+.row .btn { width: auto; padding: 12px 22px; }
+.mastery-row.static { cursor: default; }
+.mastery-row.static:hover { border-color: var(--border); background: transparent; }
+.notice { background: #fff8e6; border: 1px solid #f3dfa6; border-radius: 12px; padding: 14px 16px; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
+.notice .btn { width: auto; padding: 10px 16px; }

@@ -1,6 +1,9 @@
+from pathlib import Path
 from typing import List
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
+_ROOT = Path(__file__).resolve().parents[3]  # Luna/ (backend/app/core/config.py)
 
 
 class Settings(BaseSettings):
@@ -13,6 +16,8 @@ class Settings(BaseSettings):
     jwt_algorithm: str = "HS256"
     jwt_expire_minutes: int = 60 * 24
     cors_origins: List[str] = ["http://localhost:3000", "http://127.0.0.1:3000"]
+    # BKT параметр (ML хэсэг сургасан). Байхгүй бол services/mastery.py-ийн анхдагч утга.
+    bkt_params_path: str = str(_ROOT / "ml" / "config" / "bkt_params.yaml")
 
 
 settings = Settings()

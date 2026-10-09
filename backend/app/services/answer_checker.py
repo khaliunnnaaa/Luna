@@ -91,3 +91,75 @@ def is_equivalent(student: str, correct: str) -> bool:
         return _equal(_parse(student), _parse(correct))
     except Exception:  # noqa: BLE001 — буруу оролт = буруу хариу
         return False
+
+
+# ---------- Алдааны төрөл (FR-10) ----------
+ERROR_EMPTY = "empty"  # хоосон хариу
+ERROR_UNPARSABLE = "unparsable"  # уншигдахгүй (жишээ: "x==")
+ERROR_SIGN = "sign_error"  # тэмдэг л зөрсөн: -3 vs 3
+ERROR_PARTIAL = "partial"  # шийдүүдийн зарим нь зөв: [3] vs [3, 4]
+ERROR_WRONG = "wrong"  # бусад
+
+ERROR_FEEDBACK = {
+    ERROR_EMPTY: "Хариу хоосон байна. Эхлээд өөрийнхөө бодлыг бичээд үз.",
+    ERROR_UNPARSABLE: "Хариуг уншиж чадсангүй. Жишээ хэлбэр: 3, 1/2, 2*sqrt(2), [3, 4], (2, -3)",
+    ERROR_SIGN: "Ойрхон байна — хариуны тэмдгийг (+/−) дахин шалгаарай.",
+    ERROR_PARTIAL: "Зарим шийдийг нь зөв олсон байна. Бүх шийдийг олсон эсэхээ шалга.",
+    ERROR_WRONG: "Буруу байна. Дараагийн сануулгыг үзээд дахин оролдоорой.",
+}
+CORRECT_FEEDBACK = "Зөв! Дараагийн бодлого руу орцгооё."
+
+
+def _negated_equal(student, correct) -> bool:
+    """Тоон/алгебрийн илэрхийлэлд зөвхөн тэмдэг зөрсөн эсэх."""
+    try:
+        if isinstance(student, Basic) and isinstance(correct, Basic) and not (
+            isinstance(student, Set) or isinstance(correct, Set)
+        ):
+            return _equal(student, -correct)
+    except Exception:  # noqa: BLE001
+        return False
+    return False
+
+
+def _partial_list(student, correct) -> bool:
+    """Зөв хариу жагсаалт бөгөөд сурагчийн оруулсан зүйл түүний хоосон биш дэд олонлог эсэх."""
+    if not isinstance(correct, list):
+        return False
+    items = student if isinstance(student, list) else [student]
+    if not items or len(items) >= len(correct):
+        return False
+    rest = list(correct)
+    for x in items:
+        i = next((i for i, y in enumerate(rest) if _equal(x, y)), None)
+        if i is None:
+            return False
+        rest.pop(i)
+    return True
+
+
+def check_answer(student: str, answers: list) -> tuple:
+    """-> (is_correct, error_type|None). `answers` — зөв хариуны хувилбарууд (SymPy хэлбэрээр)."""
+    student = (student or "").strip()
+    if not student:
+        return False, ERROR_EMPTY
+    try:
+        s = _parse(student)
+    except Exception:  # noqa: BLE001
+        return False, ERROR_UNPARSABLE
+    parsed = []
+    for a in answers:
+        try:
+            parsed.append(_parse(a))
+        except Exception:  # noqa: BLE001
+            continue
+    for c in parsed:
+        if _equal(s, c):
+            return True, None
+    for c in parsed:
+        if _negated_equal(s, c):
+            return False, ERROR_SIGN
+    for c in parsed:
+        if _partial_list(s, c):
+            return False, ERROR_PARTIAL
+    return False, ERROR_WRONG

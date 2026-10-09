@@ -37,3 +37,6 @@ data/ocr_images/*
 # Локал SQLite сан
 *.db
 *.tsbuildinfo
+
+# Cowork түр файл
+.luna_sync.tgz

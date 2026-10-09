@@ -139,3 +139,94 @@ export type Problem = {
   terms: string[];
   source: string | null;
 };
+
+// ---------- Сурагчийн урсгал (FR-05, 06, 08, 09, 10) ----------
+export type ProblemStudent = {
+  id: number;
+  code: string | null;
+  topic_id: string;
+  topic_name: string;
+  subtopic: string | null;
+  difficulty: number;
+  statement: string;
+  terms: string[];
+  hint_count: number;
+  my_attempts: number;
+  solved: boolean;
+};
+
+export type NextProblem = {
+  problem: ProblemStudent | null;
+  topic_id: string;
+  reason: string;
+  target_difficulty: number;
+};
+
+export type Hint = { level: number; hint: string; hint_count: number };
+
+export type AttemptResult = {
+  is_correct: boolean;
+  error_type: string | null;
+  feedback: string;
+  topic_id: string;
+  mastery_before: number;
+  mastery_after: number;
+  attempts_on_problem: number;
+};
+
+export type MasteryItem = {
+  topic_id: string;
+  name: string;
+  grade: number;
+  p_mastery: number;
+  attempts_count: number;
+  correct_count: number;
+  mastered: boolean;
+  prerequisites: string[];
+};
+
+export type TermPublic = {
+  id: number;
+  term: string;
+  explanation: string;
+  example: string | null;
+  topic_id: string | null;
+};
+
+export const DIFFICULTY_LABEL: Record<number, string> = { 1: "хялбар", 2: "дунд", 3: "хүнд" };
+
+// ---------- Түвшин тогтоох тест (FR-02) ----------
+export type PlacementQuestion = {
+  problem_id: number;
+  topic_id: string;
+  topic_name: string;
+  difficulty: number;
+  statement: string;
+  terms: string[];
+};
+
+export type PlacementTopicResult = {
+  topic_id: string;
+  topic_name: string;
+  difficulty: number;
+  correct: boolean;
+  p_mastery: number;
+};
+
+export type PlacementState = {
+  status: "none" | "active" | "done";
+  index: number;
+  total: number;
+  question: PlacementQuestion | null;
+  started_at: string | null;
+  seconds_left: number | null;
+  result: PlacementTopicResult[];
+  correct_count: number;
+};
+
+export type PlacementAnswer = {
+  correct: boolean;
+  error_type: string | null;
+  feedback: string;
+  state: PlacementState;
+};
