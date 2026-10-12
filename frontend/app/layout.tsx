@@ -1,12 +1,12 @@
 import type { Metadata, Viewport } from "next";
-import { IBM_Plex_Sans } from "next/font/google";
+import { Nunito } from "next/font/google";
 import "katex/dist/katex.min.css";
 import "./globals.css";
 
-// DM Sans кирилл үсэггүй тул кирилл дэмждэг IBM Plex Sans-ийг үндсэн фонт болгов.
-const sans = IBM_Plex_Sans({
+// Nunito — дугуй хэлбэртэй, найрсаг, кирилл үсэгтэй (хатуу serif/editorial мэдрэмжээс зайлсхийх)
+const sans = Nunito({
   subsets: ["latin", "cyrillic"],
-  weight: ["400", "500", "600", "700"],
+  weight: ["400", "500", "600", "700", "800"],
   variable: "--font-sans",
   display: "swap",
 });

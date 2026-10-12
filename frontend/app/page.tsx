@@ -63,7 +63,7 @@ export default function Home() {
 
           <div className="card landing-card" aria-hidden>
             <div className="indexline">
-              <span>Алхам 01 / 03</span>
+              <span>Алхам 1 / 3</span>
               <span>Квадрат тэгшитгэл</span>
             </div>
             <div className="math">
@@ -82,17 +82,17 @@ export default function Home() {
 
         <section className="how">
           <div>
-            <span className="note-num">01</span>
+            <span className="note-num">1</span>
             <h3>Түвшнээ тогтоо</h3>
             <p>10 минутын богино тестээр хаанаас эхлэхээ мэднэ. Энэ нь шалгалт биш.</p>
           </div>
           <div>
-            <span className="note-num">02</span>
+            <span className="note-num">2</span>
             <h3>Алхам алхмаар бод</h3>
             <p>Гацвал шатлан сануулга авна. Ойлгохгүй үг дээр дарвал тайлбар гарна.</p>
           </div>
           <div>
-            <span className="note-num">03</span>
+            <span className="note-num">3</span>
             <h3>Ахицаа хар</h3>
             <p>Бодсон бодлого бүр сэдвийн эзэмшилд нөлөөлж, дараагийн дасгалыг тохируулна.</p>
           </div>

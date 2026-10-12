@@ -85,7 +85,7 @@ export default function PlacementPage() {
       <Link href="/dashboard" className="back">
         ← Нүүр рүү
       </Link>
-      <PageHead eyebrow="Түвшин тогтоох / FR-02" title="Хаанаас эхлэхээ мэдье.">
+      <PageHead eyebrow="Түвшин тогтоох тест" title="Хаанаас эхлэхээ мэдье.">
         8–10 богино асуулт, 10 минутаас хэтрэхгүй. Энэ нь шалгалт биш — зөвхөн дасгалаа хаанаас
         эхлэхийг тогтооно.
       </PageHead>
@@ -117,7 +117,7 @@ export default function PlacementPage() {
         <div className="card question">
           <div className="indexline">
             <span>
-              Асуулт {String(state.index + 1).padStart(2, "0")} / {String(state.total).padStart(2, "0")}
+              Асуулт {state.index + 1} / {state.total}
             </span>
             <span className="tags">
               <span className="badge muted">{state.question.topic_name}</span>
@@ -164,7 +164,7 @@ export default function PlacementPage() {
                 spellCheck={false}
                 disabled={busy}
                 autoFocus
-                style={{ fontFamily: "var(--serif)", fontSize: 18 }}
+                style={{ fontSize: 19, fontWeight: 600 }}
               />
               <span className="hint">Олон шийдтэй бол [3, 4], цэг бол (2, -3). x^2, sqrt(2), pi.</span>
             </div>

@@ -11,6 +11,9 @@ type Props = {
   onNext?: () => void; // "Дараагийн бодлого" дарахад
 };
 
+// Сануулгын 3 шат: онол → арга → анхаарах зүйл (ml/tools/bank_hints.py)
+const HINT_LABEL: Record<number, string> = { 1: "Онол", 2: "Арга", 3: "Анхаар" };
+
 // Хариуны талбарт хурдан оруулах тэмдэгтүүд (SymPy хэлбэр)
 const SNIPPETS = [
   { label: "√", insert: "sqrt()", title: "Квадрат язгуур: sqrt(2)" },
@@ -202,7 +205,9 @@ export default function ProblemSolver({ problem, reason, onNext }: Props) {
               </div>
               {term.explanation ? (
                 <>
-                  <p>{term.explanation}</p>
+                  <p>
+                    <MathText text={term.explanation} />
+                  </p>
                   {term.example && (
                     <p className="hint">
                       Жишээ: <MathText text={term.example} />
@@ -219,6 +224,7 @@ export default function ProblemSolver({ problem, reason, onNext }: Props) {
             <ol className="hints" aria-live="polite">
               {hints.map((h) => (
                 <li key={h.level}>
+                  <span className="hint-label">{HINT_LABEL[h.level] ?? `Сануулга ${h.level}`}</span>
                   <MathText text={h.hint} />
                 </li>
               ))}

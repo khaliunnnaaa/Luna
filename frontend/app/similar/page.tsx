@@ -90,7 +90,7 @@ function Similar() {
       <Link href="/upload" className="back">
         ← Бодлого оруулах
       </Link>
-      <PageHead eyebrow="Хамт бодъё / 03" title="Эхлээд жишээгээр.">
+      <PageHead eyebrow="Хамт бодъё" title="Эхлээд жишээгээр.">
         Ижил төрлийн бодлогыг алхам алхмаар харна. Дараагийн алхмыг нээхээсээ өмнө өөрөө таах гээд
         үзээрэй.
       </PageHead>

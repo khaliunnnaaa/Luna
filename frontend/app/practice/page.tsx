@@ -38,7 +38,7 @@ function Practice() {
         ← Нүүр рүү
       </Link>
       <PageHead
-        eyebrow={topic && next?.problem ? `Дасгал / ${next.problem.topic_name}` : "Дасгал"}
+        eyebrow={topic && next?.problem ? `Дасгал · ${next.problem.topic_name}` : "Дасгал"}
         title="Нэг алхмаар эхэлье."
       >
         Хариуг яаралгүй, эхлээд яагаад гэдгийг нь бодоорой. Гацвал сануулга аваарай.
