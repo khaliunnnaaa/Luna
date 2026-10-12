@@ -10,9 +10,9 @@ import { getToken, logout, me, ROLE_LABEL, User } from "@/lib/api";
 // Нэвтрээгүй бол /login руу шилжүүлнэ.
 const NAV = [
   { href: "/dashboard", label: "Нүүр", match: ["/dashboard"] },
-  { href: "/upload", label: "Бодлого оруулах", match: ["/upload", "/similar"] },
   { href: "/practice", label: "Дасгал", match: ["/practice", "/problems"] },
-  { href: "/placement", label: "Түвшин тогтоох", match: ["/placement"] },
+  { href: "/upload", label: "Бодлого оруулах", match: ["/upload", "/similar"] },
+  { href: "/progress", label: "Миний ахиц", match: ["/progress", "/placement"] },
 ];
 
 export default function Shell({ children }: { children: React.ReactNode }) {
@@ -86,12 +86,18 @@ export default function Shell({ children }: { children: React.ReactNode }) {
       </header>
       <main className="wrap" id="main">
         {children}
-        <footer className="foot">
-          <span>алхам — математик сурахад туслах ухаалаг веб систем</span>
-          <span>Хариу биш, чиглүүлэг.</span>
-        </footer>
       </main>
+      <Footer />
     </div>
+  );
+}
+
+export function Footer() {
+  return (
+    <footer className="foot">
+      <span>алхам — математик сурахад туслах ухаалаг веб систем</span>
+      <span>Хариу биш, чиглүүлэг.</span>
+    </footer>
   );
 }
 

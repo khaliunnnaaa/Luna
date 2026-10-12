@@ -178,7 +178,6 @@ export default function ProblemSolver({ problem, reason, onNext }: Props) {
           <span className="tags">
             <span className="badge">{problem.topic_name}</span>
             <span className="badge muted">{DIFFICULTY_LABEL[problem.difficulty]}</span>
-            {problem.subtopic && <span className="badge muted">{problem.subtopic}</span>}
             {solved && <span className="badge ok">✓ бодсон</span>}
           </span>
         </div>

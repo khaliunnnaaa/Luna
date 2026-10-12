@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 
 import MathText from "@/components/MathText";
+import { Footer } from "@/components/Shell";
 import { getToken } from "@/lib/api";
 
 export default function Home() {
@@ -19,12 +20,12 @@ export default function Home() {
         </Link>
         <div className="account">
           {authed ? (
-            <Link href="/dashboard" className="btn small">
+            <Link href="/dashboard" className="btn small rust">
               Самбар руу →
             </Link>
           ) : (
             <>
-              <Link href="/login" className="logout" style={{ fontSize: 13, fontWeight: 600 }}>
+              <Link href="/login" className="logout" style={{ fontSize: 13, fontWeight: 600, textDecoration: "none" }}>
                 Нэвтрэх
               </Link>
               <Link href="/register" className="btn small rust">
@@ -97,11 +98,8 @@ export default function Home() {
           </div>
         </section>
 
-        <footer className="foot">
-          <span>алхам — математик сурахад туслах ухаалаг веб систем</span>
-          <span>Хариу биш, чиглүүлэг.</span>
-        </footer>
       </main>
+      <Footer />
     </div>
   );
 }

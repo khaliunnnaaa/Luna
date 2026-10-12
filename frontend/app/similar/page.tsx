@@ -107,7 +107,6 @@ function Similar() {
             <span>Жишээ бодлого</span>
             <span className="tags">
               <span className="badge">{ex.topic_name}</span>
-              {ex.subtopic && <span className="badge muted">{ex.subtopic}</span>}
               <span className="badge muted">{DIFFICULTY_LABEL[ex.difficulty]}</span>
             </span>
           </div>

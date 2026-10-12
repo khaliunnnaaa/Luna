@@ -182,28 +182,14 @@ export default function PlacementPage() {
 
       {state?.status === "done" && (
         <>
-          <div className="stats" style={{ marginBottom: 40 }}>
-            <div className="stat">
-              <span className="large">{state.correct_count}</span>
-              <span className="caption">Зөв хариулт</span>
-            </div>
-            <div className="stat">
-              <span className="large">{state.index}</span>
-              <span className="caption">Хариулсан асуулт</span>
-            </div>
-            <div className="stat">
-              <span className="large">{state.result.length}</span>
-              <span className="caption">Үнэлсэн сэдэв</span>
-            </div>
-          </div>
           <div className="bottom">
             <div>
               <div className="section-label">
                 <h2>Эхлэх түвшин тогтлоо</h2>
               </div>
               <p className="muted" style={{ fontSize: 14, lineHeight: 1.9, maxWidth: 440 }}>
-                Сэдэв бүрийн анхны эзэмшил доорх байдлаар тогтлоо. Одоо систем танд тохирох дасгалыг
-                эндээс эхлэн санал болгоно.
+                {state.index} асуултаас {state.correct_count}-д зөв хариуллаа. Сэдэв бүрийн эхлэх түвшин
+                тогтлоо — одоо систем танд тохирох дасгалыг эндээс эхлэн санал болгоно.
               </p>
               <div className="actions" style={{ marginTop: 20 }}>
                 <Link href="/practice" className="btn rust">
