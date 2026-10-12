@@ -104,6 +104,11 @@ ID, код бүгд ML хэсэгтэй нийцдэг (T01-001 … бодлог
 - Хуудас: `/dashboard` (эзэмшлийн самбар + placement сануулга), `/practice[?topic=]`, `/problems/[id]`,
   `/placement`, `/admin/*` (FR-16). `useSearchParams` ашиглавал `<Suspense>`-д боох (build шаарддаг).
 - CSS класс: `.student`, `.card.wide`, `.bar/.bar-fill`, `.mastery-row`, `.solver`, `.term` — globals.css.
+- **Дизайн дүрэм («алхам»):** өнгө 60:30:10 — 60% цаас (`--paper/--white`), 30% ногоон (`--green*`:
+  толгой, хөл, гол карт, явц, сануулга, энгийн `.btn`), 10% зэвэн улаан (`--rust*`: зөвхөн гол үйлдэл
+  `.btn.rust`, идэвхтэй цэс, линк). Шинэ өнгө нэмэхгүй. **Нэг хуудас = нэг зорилго:** Нүүр (`/dashboard`)
+  зөвхөн «одоо юу хийх» (1 гол карт + 3 сэдэв); статистик, бүх сэдвийн эзэмшил `/progress`-д.
+  Нийтлэг толгой/хөл `components/Shell.tsx` (`PageHead`, `Loading`).
 
 ## Ажлын явц ба дүрэм
 
@@ -132,6 +137,15 @@ FR-07 ✅ (`services/similar.py`, `/similar`, `bank_steps.py` 200 бодолт).
 OCR: `ml/notebooks/ocr_colab.ipynb` (Colab GPU) — шошголох ноорог, үнэлгээ, синтетик өгөгдөл,
 pix2tex fine-tune; fine-tune жинг `PIX2TEX_CHECKPOINT`/`PIX2TEX_CONFIG` env-ээр `pipeline.py` ачаална.
 Зураг 0/300 — хэрэглэгч цуглуулж байгаа.
+
+**OCR веб-д ажиллаж байна (2026-10-12):** `math-ocr/` модуль (Tesseract mon + layout + pix2tex,
+бутархай илрүүлэх, зургийн чанар шалгах) → `ml/service.py` `/ocr` нь `MathOCR`-ыг арын thread-д
+ачаалж дуудна (`MATH_OCR_DIR`, docker-д `/math-ocr` mount) → `{text, latex, markdown, needs_review, quality}`.
+Backend `edited_text` = `markdown` (`$...$`-тэй, дараалал хадгалсан); чанарын асуудлыг `message`-д.
+Mac: `brew install tesseract tesseract-lang`; ml venv-д `requirements-ocr.txt` (opencv <4.12 — numpy<2).
+`ml/ml/ocr/pipeline.py` хуучин, ашиглагдахгүй. Синтетик 6 зураг дээр текст бүгд зөв, `\frac` зөв,
+`log₅` → "1085" гэж уншсан тохиолдол бий. **Бодит нарийвчлал (NFR-05) хэмжигдээгүй** — README-ийн 97% нь
+англи синтетик layout-ийн тоо, NFR-05-ийн нотолгоо биш.
 
 ## Дараагийн алхмууд (санал болгосон дараалал)
 

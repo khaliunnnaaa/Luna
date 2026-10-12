@@ -1,6 +1,9 @@
 # 4-р модуль (OCR). Torch татдаг тул тусад нь суулгана.
 # Tesseract программыг өөрийг нь: brew install tesseract
 -r requirements.txt
+# math-ocr/ модуль (service.py /ocr) — numpy<2-той нийцүүлж opencv-г хязгаарлав
 pix2tex>=0.1.2
 pytesseract>=0.3.10
 Pillow>=10.0
+opencv-python-headless>=4.8,<4.12
+munch>=4.0

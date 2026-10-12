@@ -25,7 +25,10 @@ services:
   ml:
     build: ./ml            # OCR-той: build: {context: ./ml, args: {WITH_OCR: "1"}}
     ports: ["8001:8001"]
-    volumes: ["./ml:/app"]
+    # math-ocr/ модулийг /math-ocr руу (service.py MATH_OCR_DIR-ээр олно)
+    volumes: ["./ml:/app", "./math-ocr:/math-ocr:ro"]
+    environment:
+      MATH_OCR_DIR: /math-ocr
 
   backend:
     build: ./backend

@@ -1,0 +1,11 @@
+opencv-python-headless>=4.8
+numpy>=1.24
+pillow>=10.0
+pytesseract>=0.3.10
+pix2tex[api]>=0.1.2      # томьёо таних (PyTorch татна)
+munch>=4.0               # fine-tune checkpoint ачаалах
+onnxruntime>=1.16        # заавал биш: MFD томьёо илрүүлэгч
+fastapi>=0.110
+uvicorn>=0.27
+python-multipart>=0.0.9
+matplotlib>=3.7          # синтетик өгөгдөл үүсгэх

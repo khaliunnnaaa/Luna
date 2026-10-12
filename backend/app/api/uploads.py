@@ -32,6 +32,8 @@ router = APIRouter(tags=["uploads"])
 
 ALLOWED = {"image/jpeg", "image/png"}
 MSG_OK = "Текстийг шалгаад, буруу танигдсан бол засаарай."
+MSG_REVIEW = "Зарим хэсгийг тодорхой таньж чадсангүй — текст, томьёог сайн шалгаж засаарай."
+MSG_EMPTY = "Зурагнаас текст олдсонгүй. Илүү тод, ойроос дахин авах эсвэл гараар бичээрэй."
 MSG_NO_ML = "Зураг таних үйлчилгээ одоогоор ажиллахгүй байна. Бодлогоо гараар бичээрэй."
 
 
@@ -116,14 +118,29 @@ async def upload_image(
 
     u.ocr_text = (ocr.get("text") or "").strip()
     u.ocr_latex = " ".join(ocr.get("latex") or []).strip() or None
-    full = " ".join(s for s in (u.ocr_text, u.ocr_latex) if s)
+    # math-ocr нь текст, томьёог дарааллаар нь $...$-тэй нэгтгэсэн markdown өгнө (frontend KaTeX)
+    full = (ocr.get("markdown") or "").strip() or " ".join(
+        s for s in (u.ocr_text, u.ocr_latex) if s
+    )
     u.edited_text = full or None
     c = ml_client.classify(full) if full else None
     u.predicted_topic = c.get("topic") if c else None
     u.status = "done"
     db.commit()
     db.refresh(u)
-    return _detail(db, u, ml_available=True, message=MSG_OK)
+    return _detail(db, u, ml_available=True, message=_ocr_message(ocr, bool(full)))
+
+
+def _ocr_message(ocr: dict, has_text: bool) -> str:
+    """Бүдэг/харанхуй зураг, эргэлзээтэй танилтыг сурагчид ойлгомжтой хэлнэ (FR-03)."""
+    issues = (ocr.get("quality") or {}).get("issues") or []
+    if not has_text:
+        return MSG_EMPTY  # хоосон зурагт "бүдэг" гэх нь төөрөгдүүлнэ
+    if issues:
+        return " ".join(issues) + " " + MSG_OK
+    if ocr.get("needs_review"):
+        return MSG_REVIEW
+    return MSG_OK
 
 
 @router.get("/uploads", response_model=List[UploadOut])
