@@ -17,9 +17,28 @@ scripts/    Туслах скриптүүд (GitHub issue үүсгэх г.м.)
 ## Эхлүүлэх
 
 ```bash
-cp .env.example .env
-docker compose up --build
+cp .env.example .env          # DATABASE_URL (Supabase), JWT_SECRET-ийг бөглө
+docker compose up --build     # backend эхлэхэд `alembic upgrade head` автоматаар ажиллана
+
+# анх удаа: бодлогын сан ачаалах + админ үүсгэх
+docker compose exec backend python -m app.seed
+docker compose exec backend python -m app.create_admin admin@example.com "НууцҮг" "Админ"
 ```
+
+### Өгөгдлийн сан: Supabase
+
+1. supabase.com → New project (region: Singapore/Tokyo ойр). DB нууц үгийг хадгал.
+2. **Connect → Session pooler** хаягийг `.env`-ийн `DATABASE_URL`-д
+   (`postgresql+psycopg://...pooler.supabase.com:5432/postgres?sslmode=require`).
+   Direct хаяг IPv6-only, Transaction pooler (6543) psycopg3/Alembic-тай таарахгүй.
+3. `docker compose up` (эсвэл локал: `cd backend && alembic upgrade head && python -m app.seed`).
+4. Migration `0005` бүх хүснэгтэд RLS асаана — Supabase-ийн REST API (anon key) өгөгдөл
+   буцаахгүй, backend `postgres` эрхээр хэвийн ажиллана. Шинэ хүснэгт нэмбэл migration-д нь
+   `ENABLE ROW LEVEL SECURITY` нэм.
+
+Локал PostgreSQL ашиглах бол `.env`-д `@db:5432` хаягийг идэвхжүүлээд
+`docker compose --profile localdb up`. Хуучин `create_all`-оор үүссэн DB-д "already exists" гарвал
+`docker compose run --rm backend alembic stamp head`.
 
 | Сервис | Хаяг |
 |---|---|
@@ -57,9 +76,9 @@ alembic stamp head                              # локал dev.db: create_all 
 alembic revision --autogenerate -m "тайлбар"    # model өөрчилсний дараа
 ```
 
-Локал SQLite дээр `uvicorn` асахад дутуу хүснэгтийг `create_all` автоматаар нэмдэг (түр шийдэл),
-тиймээс dev.db-д `upgrade` хийхэд "table already exists" гарвал `alembic stamp head` хийнэ.
-PostgreSQL (Docker) дээр зөвхөн Alembic ашиглана.
+Локал SQLite дээр `uvicorn`/seed асахад дутуу хүснэгтийг `create_all` автоматаар нэмдэг
+(`init_dev_db`), тиймээс dev.db-д `upgrade` хийхэд "table already exists" гарвал `alembic stamp head`.
+PostgreSQL (Docker) дээр `create_all` ажиллахгүй — зөвхөн Alembic (`backend/docker-entrypoint.sh`).
 
 ## API-ийн ерөнхий зураг
 
@@ -71,11 +90,12 @@ PostgreSQL (Docker) дээр зөвхөн Alembic ашиглана.
 | learning | `POST /problems/{id}/attempt` → зөв/буруу, алдааны төрөл, mastery өмнө/дараа | FR-10, FR-08 |
 | placement | `GET /placement`, `POST /placement/start`, `POST /placement/answer`, `POST /placement/finish` — 8–10 асуулт, adaptive, ≤10 мин | FR-02 |
 | uploads | `POST /uploads` (зураг → OCR → ангилал), `PUT /uploads/{id}` (засах), `GET /uploads/{id}/image`, `DELETE`, `POST /classify`, `GET /ml/health` | FR-03, FR-04 |
+| similar | `POST /similar {text, topic_id?, exclude}` — ижил төстэй бодлого + алхамчилсан бодолт; `POST /uploads/{id}/outcome` | FR-07 |
 | learning | `GET /next`, `GET /next?topic_id=T04` → санал болгосон дасгал + шалтгаан | FR-09, FR-11 |
 | learning | `POST /term-clicks`, `GET /me/mastery`, `GET /me/attempts` | FR-05, FR-08 |
 
 Frontend хуудсууд: `/dashboard` (сэдвийн эзэмшил, статистик), `/practice` (санал болгосон дасгал),
-`/practice?topic=T04` (сонгосон сэдвээс), `/problems/{id}` (тодорхой бодлого), `/placement` (түвшин тогтоох тест), `/upload` (зураг оруулах).
+`/practice?topic=T04` (сонгосон сэдвээс), `/problems/{id}` (тодорхой бодлого), `/placement` (түвшин тогтоох тест), `/upload` (зураг оруулах), `/similar` (ижил төстэй бодлогыг алхам алхмаар).
 
 ## Технологи
 

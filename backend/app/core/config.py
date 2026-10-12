@@ -28,6 +28,7 @@ class Settings(BaseSettings):
     s3_access_key: str = ""
     s3_secret_key: str = ""
     s3_bucket: str = "uploads"
+    s3_region: str = "us-east-1"  # MinIO-д хамаагүй; Supabase Storage-д төслийн region
     upload_dir: str = str(_ROOT / "backend" / "uploads")
     max_upload_bytes: int = 10 * 1024 * 1024
 

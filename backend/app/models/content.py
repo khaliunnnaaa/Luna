@@ -62,6 +62,8 @@ class Problem(Base):
     statement: Mapped[str] = mapped_column(Text)
     answers: Mapped[List[str]] = mapped_column(JSON, default=list)  # SymPy-д уншигдах хэлбэрээр
     hints: Mapped[List[str]] = mapped_column(JSON, default=list)  # 3 шатны сануулга (FR-06)
+    # FR-07: алхамчилсан бүрэн бодолт — зөвхөн "ижил төстэй бодлого"-оор тайлбарлахад харуулна
+    solution_steps: Mapped[List[str]] = mapped_column(JSON, default=list)
     common_mistakes: Mapped[Optional[str]] = mapped_column(Text, nullable=True)  # FR-08/10-д
     terms: Mapped[List[str]] = mapped_column(JSON, default=list)  # холбоотой нэр томьёо (FR-05)
     source: Mapped[Optional[str]] = mapped_column(String(200), nullable=True)

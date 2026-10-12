@@ -73,6 +73,7 @@ class ProblemIn(BaseModel):
     statement: str = Field(min_length=1)
     answers: List[str]
     hints: List[str] = []
+    solution_steps: List[str] = []
     common_mistakes: Optional[str] = None
     terms: List[str] = []
     source: Optional[str] = Field(default=None, max_length=200)
@@ -103,6 +104,14 @@ class ProblemIn(BaseModel):
             raise ValueError("Сануулга 3-аас ихгүй байна")
         return v
 
+    @field_validator("solution_steps")
+    @classmethod
+    def clean_steps(cls, v: List[str]) -> List[str]:
+        v = _strip_list(v)
+        if len(v) > 12:
+            raise ValueError("Бодолтын алхам 12-оос ихгүй байна")
+        return v
+
     @field_validator("terms")
     @classmethod
     def clean_terms(cls, v: List[str]) -> List[str]:
@@ -125,6 +134,7 @@ class ProblemOut(BaseModel):
     statement: str
     answers: List[str]
     hints: List[str]
+    solution_steps: List[str]
     common_mistakes: Optional[str]
     terms: List[str]
     source: Optional[str]

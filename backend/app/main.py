@@ -6,13 +6,13 @@ from fastapi.middleware.cors import CORSMiddleware
 import app.models  # noqa: F401 — хүснэгтүүдийг Base-д бүртгэнэ
 from app.api import auth, content, health, learning, placement, uploads
 from app.core.config import settings
-from app.core.database import Base, engine
+from app.core.database import init_dev_db
 
 
 @asynccontextmanager
 async def lifespan(_: FastAPI):
-    # Түр шийдэл: хүснэгтүүдийг автоматаар үүсгэнэ. Дараа нь Alembic migration руу шилжинэ.
-    Base.metadata.create_all(bind=engine)
+    # SQLite dev: хүснэгтийг автоматаар үүсгэнэ. PostgreSQL: docker-entrypoint.sh → alembic.
+    init_dev_db()
     yield
 
 

@@ -17,7 +17,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 import app.models  # noqa: F401
-from app.core.database import Base, SessionLocal, engine
+from app.core.database import SessionLocal, init_dev_db
 from app.models.content import Problem, Term, Topic
 
 CSV_DIR = Path(__file__).resolve().parents[2] / "ml" / "csv"
@@ -70,6 +70,8 @@ def seed_problems(db: Session, path: Path) -> int:
         p.statement = statement_of(r["бодлогын_текст"], r["томьёо_LaTeX"])
         p.answers = [r["хариу_sympy"]]
         p.hints = [h for h in (r["сануулга_1"], r["сануулга_2"], r["сануулга_3"]) if h]
+        steps = r.get("бодолтын_алхам", "").split("||")
+        p.solution_steps = [st.strip() for st in steps if st.strip()]
         p.common_mistakes = r.get("түгээмэл_алдаа") or None
         p.terms = _split(r.get("нэр_томьёо", ""))
         p.source = "Бодлогын сан (capstone)"
@@ -88,7 +90,7 @@ def seed_all(db: Session, csv_dir: Path = CSV_DIR) -> Dict[str, int]:
 
 
 def main() -> None:
-    Base.metadata.create_all(bind=engine)
+    init_dev_db()
     with SessionLocal() as db:
         c = seed_all(db)
     print(f"Ачааллаа: {c['topics']} сэдэв, {c['terms']} нэр томьёо, {c['problems']} бодлого")

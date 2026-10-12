@@ -78,6 +78,8 @@ class Upload(Base):
     ocr_latex: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     edited_text: Mapped[Optional[str]] = mapped_column(Text, nullable=True)  # сурагчийн засвар
     predicted_topic: Mapped[Optional[str]] = mapped_column(String(64), nullable=True)
+    # FR-07: ижил төстэй бодлогоор тайлбарласны дараа сурагч өөрийн бодлогоо бодож чадсан эсэх
+    outcome: Mapped[Optional[str]] = mapped_column(String(16), nullable=True)  # solved | unsolved
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
 
 

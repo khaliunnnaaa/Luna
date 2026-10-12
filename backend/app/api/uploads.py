@@ -16,8 +16,17 @@ from app.core.database import get_db
 from app.models.content import Term, Topic
 from app.models.learning import Upload
 from app.models.user import User
-from app.schemas.uploads import ClassifyIn, ClassifyOut, UploadDetailOut, UploadEditIn, UploadOut
-from app.services import ml_client, storage
+from app.schemas.uploads import (
+    ClassifyIn,
+    ClassifyOut,
+    OutcomeIn,
+    SimilarIn,
+    SimilarOut,
+    UploadDetailOut,
+    UploadEditIn,
+    UploadOut,
+)
+from app.services import ml_client, similar, storage
 
 router = APIRouter(tags=["uploads"])
 
@@ -174,6 +183,72 @@ def delete_upload(
     db.delete(u)
     db.commit()
     return Response(status_code=status.HTTP_204_NO_CONTENT)
+
+
+# ================= FR-07: ижил төстэй бодлогоор тайлбарлах =================
+@router.post("/similar", response_model=SimilarOut)
+def similar_problem(
+    data: SimilarIn, db: Session = Depends(get_db), user: User = Depends(get_current_user)
+) -> SimilarOut:
+    """Сурагчийн бодлогын оронд ижил төрлийн бодлогыг алхамчилсан бодолттой нь өгнө.
+
+    Систем сурагчийн өөрийн бодлогыг бодохгүй (FR-06) — жишээг хамт бодсоны дараа сурагч
+    өөрийнхөө бодлогыг бие даан бодно.
+    """
+    c = ml_client.classify(data.text) if data.text.strip() else None
+    topic_id = data.topic_id or (c.get("topic") if c else None)
+    if not topic_id:
+        raise HTTPException(
+            status.HTTP_400_BAD_REQUEST,
+            detail="Сэдвийг тодорхойлж чадсангүй — сэдвээ сонгоно уу",
+        )
+    topic = db.get(Topic, topic_id)
+    if topic is None:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, detail="Сэдэв олдсонгүй")
+    p = similar.find_similar(
+        db,
+        user.id,
+        topic_id,
+        difficulty=c.get("difficulty") if c else None,
+        subtopics=c.get("subtopics") if c else None,
+        exclude=data.exclude,
+    )
+    if p is None:
+        raise HTTPException(
+            status.HTTP_404_NOT_FOUND, detail="Энэ сэдэвт бодолттой жишээ бодлого алга"
+        )
+    reason = f"{topic.name} сэдвийн"
+    if p.subtopic:
+        reason += f" «{p.subtopic}» төрлийн"
+    reason += " жишээ. Алхмуудыг нэг нэгээр нь нээж, дараа нь өөрийнхөө бодлогыг бод."
+    return SimilarOut(
+        topic_id=topic_id,
+        topic_name=topic.name,
+        problem_id=p.id,
+        code=p.code,
+        subtopic=p.subtopic,
+        difficulty=p.difficulty,
+        statement=p.statement,
+        terms=p.terms or [],
+        steps=p.solution_steps,
+        reason=reason,
+        ml_available=c is not None,
+    )
+
+
+@router.post("/uploads/{upload_id}/outcome", response_model=UploadDetailOut)
+def set_outcome(
+    upload_id: int,
+    data: OutcomeIn,
+    db: Session = Depends(get_db),
+    user: User = Depends(get_current_user),
+) -> UploadDetailOut:
+    """FR-07: жишээг үзсэний дараа сурагч өөрийн бодлогоо бодож чадсан эсэхээ тэмдэглэнэ."""
+    u = _mine_or_404(db, upload_id, user)
+    u.outcome = "solved" if data.solved else "unsolved"
+    db.commit()
+    db.refresh(u)
+    return _detail(db, u, ml_available=True, message="")
 
 
 @router.get("/ml/health")

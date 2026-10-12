@@ -11,6 +11,7 @@ from openpyxl.styles import Alignment, Font, PatternFill
 from openpyxl.utils import get_column_letter
 
 from bank_data import GLOSSARY, P, TOPICS
+from bank_steps import STEPS
 
 x, y, a, b, k = symbols("x y a b k")
 HERE = Path(__file__).resolve().parent
@@ -43,15 +44,16 @@ def main():
             fails.append((i, latex, g, e))
         pid = f"{topic}-{i:03d}"
         prereq = dict((t[0], t[3]) for t in TOPICS)[topic]
+        steps = " || ".join(st for st in STEPS.get(pid, []) if st)  # FR-07 бодолтын алхмууд
         rows.append([pid, topic, sub, lvl, text, latex, ans, str(e), prereq, terms,
-                     hints[0], hints[1], hints[2], mis, "OK" if ok else "ШАЛГАХ"])
+                     hints[0], hints[1], hints[2], mis, "OK" if ok else "ШАЛГАХ", steps])
     print(f"SymPy шалгалт: {len(P) - len(fails)}/{len(P)} зөв")
     for f in fails:
         print("  ЗӨРҮҮ:", f)
 
     head = ["id", "сэдэв_код", "дэд_сэдэв", "түвшин(1-3)", "бодлогын_текст", "томьёо_LaTeX",
             "хариу", "хариу_sympy", "prerequisite", "нэр_томьёо", "сануулга_1", "сануулга_2",
-            "сануулга_3", "түгээмэл_алдаа", "sympy_шалгалт"]
+            "сануулга_3", "түгээмэл_алдаа", "sympy_шалгалт", "бодолтын_алхам"]
 
     wb = Workbook()
     hdr_fill = PatternFill("solid", fgColor="1F4E78")
@@ -74,7 +76,7 @@ def main():
 
     ws = wb.active
     ws.title = "Бодлого"
-    sheet(ws, head, rows, [11, 9, 22, 9, 40, 30, 18, 18, 12, 30, 38, 38, 38, 38, 10])
+    sheet(ws, head, rows, [11, 9, 22, 9, 40, 30, 18, 18, 12, 30, 38, 38, 38, 38, 10, 60])
 
     topic_name = {t[0]: t[1] for t in TOPICS}
     ws2 = wb.create_sheet("Сэдвүүд")

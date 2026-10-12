@@ -45,6 +45,7 @@ class LocalStorage:
 class S3Storage:
     def __init__(self):
         import boto3
+        from botocore.config import Config
 
         self.bucket = settings.s3_bucket
         self.client = boto3.client(
@@ -52,6 +53,9 @@ class S3Storage:
             endpoint_url=settings.s3_endpoint,
             aws_access_key_id=settings.s3_access_key,
             aws_secret_access_key=settings.s3_secret_key,
+            region_name=settings.s3_region,
+            # path-style: MinIO болон Supabase Storage хоёулаа bucket-ийг URL замд хүлээнэ
+            config=Config(s3={"addressing_style": "path"}),
         )
         try:
             self.client.head_bucket(Bucket=self.bucket)

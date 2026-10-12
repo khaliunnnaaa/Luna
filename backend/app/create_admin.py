@@ -9,7 +9,7 @@ import sys
 from sqlalchemy import select
 
 import app.models  # noqa: F401
-from app.core.database import Base, SessionLocal, engine
+from app.core.database import SessionLocal, init_dev_db
 from app.core.security import hash_password
 from app.models.user import Role, User
 
@@ -20,7 +20,7 @@ def main() -> None:
         sys.exit(1)
     email, password = sys.argv[1].strip().lower(), sys.argv[2]
     name = sys.argv[3] if len(sys.argv) > 3 else "Админ"
-    Base.metadata.create_all(bind=engine)
+    init_dev_db()
     with SessionLocal() as db:
         if db.scalar(select(User).where(User.email == email)):
             print(f"{email} аль хэдийн бүртгэлтэй байна.")

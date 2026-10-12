@@ -29,6 +29,7 @@ class UploadOut(BaseModel):
     ocr_latex: Optional[str]
     edited_text: Optional[str]
     predicted_topic: Optional[str]
+    outcome: Optional[str] = None
     created_at: datetime
 
 
@@ -40,3 +41,29 @@ class UploadDetailOut(UploadOut):
 
 class UploadEditIn(BaseModel):
     edited_text: str = Field(min_length=1, max_length=2000)
+
+
+class SimilarIn(BaseModel):
+    """Сурагчийн бодлогын текст (OCR/гараар) эсвэл шууд сэдэв."""
+
+    text: str = Field(default="", max_length=2000)
+    topic_id: Optional[str] = None  # ML-гүй үед эсвэл сурагч сэдвээ өөрөө сонгосон
+    exclude: List[int] = []  # өмнө үзсэн жишээнүүд
+
+
+class SimilarOut(BaseModel):
+    topic_id: str
+    topic_name: str
+    problem_id: int
+    code: Optional[str]
+    subtopic: Optional[str]
+    difficulty: int
+    statement: str
+    terms: List[str]
+    steps: List[str]  # алхамчилсан бодолт — жишээ бодлогынх, сурагчийнх биш
+    reason: str
+    ml_available: bool
+
+
+class OutcomeIn(BaseModel):
+    solved: bool
