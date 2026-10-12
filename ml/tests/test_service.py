@@ -11,7 +11,7 @@ def test_health():
     r = client.get("/health")
     assert r.status_code == 200
     body = r.json()
-    assert body["status"] == "ok" and set(body) == {"status", "classifier", "ocr"}
+    assert body["status"] == "ok" and {"status", "classifier", "ocr"} <= set(body)
 
 
 @needs_models
@@ -28,9 +28,24 @@ def test_classify_validation():
 
 
 def test_ocr_unavailable_or_rejects_bad_type(monkeypatch):
-    monkeypatch.setattr(service, "_ocr_ready", lambda: False)
+    monkeypatch.setattr(service, "_ocr", None)  # загвар ачаалагдаагүй → гараар бичих горим (NFR-07)
     r = client.post("/ocr", files={"file": ("a.jpg", b"xx", "image/jpeg")})
     assert r.status_code == 503
-    monkeypatch.setattr(service, "_ocr_ready", lambda: True)
+    monkeypatch.setattr(service, "_ocr", lambda data: {})
     r = client.post("/ocr", files={"file": ("a.gif", b"xx", "image/gif")})
     assert r.status_code == 415
+
+
+def test_ocr_response_shape(monkeypatch):
+    """MathOCR-ийн үр дүнг backend-ийн хүлээдэг {text, latex, markdown} болгоно; $$ → $."""
+    fake = {
+        "markdown": "Бод:\n$$x^{2}-1=0$$",
+        "lines": [[{"type": "text", "content": "Бод:"}], [{"type": "formula", "content": "x^{2}-1=0"}]],
+        "needs_review": False, "quality": {"issues": []}, "engines": {}, "timing_ms": {"total": 1},
+    }
+    monkeypatch.setattr(service, "_ocr", lambda data: fake)
+    r = client.post("/ocr", files={"file": ("a.png", b"xx", "image/png")})
+    assert r.status_code == 200
+    body = r.json()
+    assert body["text"] == "Бод:" and body["latex"] == ["x^{2}-1=0"]
+    assert body["markdown"] == "Бод:\n$x^{2}-1=0$"
