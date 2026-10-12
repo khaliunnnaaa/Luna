@@ -43,3 +43,6 @@ data/ocr_images/*
 
 # Локал зургийн хадгалалт (dev)
 backend/uploads/
+
+# DB нөөц файл (хэрэглэгчийн өгөгдөл)
+*.db.bak*
