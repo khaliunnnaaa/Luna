@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
+import ParentLink from "@/components/ParentLink";
 import Shell, { Loading, PageHead } from "@/components/Shell";
 import { api, getToken, MasteryItem } from "@/lib/api";
 
@@ -98,6 +99,7 @@ export default function ProgressPage() {
           </p>
         </>
       )}
+      <ParentLink />
     </Shell>
   );
 }

@@ -54,9 +54,10 @@ Docker backend-д `./ml` → `/ml:ro` mount (seed, bkt_params зам). Docker Ma
 | mastery | learning.py | (user_id, topic_id) PK, p_mastery (BKT), attempts/correct count |
 | term_clicks, uploads, parent_child_links | learning.py | FR-05 дохио, FR-03 зураг (хараахан ашиглаагүй), FR-14 (хараахан ашиглаагүй) |
 | placement_sessions | learning.py | FR-02 тестийн явц: items JSON, topic_queue, difficulty |
+| link_codes | learning.py | FR-14: сурагчийн үүсгэсэн 6 тэмдэгт нэг удаагийн код (48 цаг), эцэг эх оруулж холбогдоно |
 
 Migration: `0001_initial`, `0002_learning_tables`, `0003_placement`, `0004_solution_steps`,
-`0005_enable_rls` (Supabase). Хариу/сануулга/mastery-ийн
+`0005_enable_rls` (Supabase), `0006_link_codes`. Хариу/сануулга/mastery-ийн
 ID, код бүгд ML хэсэгтэй нийцдэг (T01-001 … бодлогын код, T01..T10 сэдэв, түвшин 1–3).
 
 ## API (backend/app/api/)
@@ -72,6 +73,11 @@ ID, код бүгд ML хэсэгтэй нийцдэг (T01-001 … бодлог
   - `GET /next[?topic_id=]` — FR-09 санал болгогч (`services/recommender.py`), FR-11 сэдэв сонгох
   - `GET /terms`, `POST /term-clicks` — FR-05; `GET /me/mastery`, `GET /me/attempts`
 - `placement.py` FR-02: `GET /placement`, `POST /placement/{start,answer,finish}`.
+- `parent.py` FR-14: сурагч `POST /me/link-code`, `GET/DELETE /me/parents`; эцэг эх `POST/GET /parent/children`,
+  `DELETE /parent/children/{id}`, `GET /parent/children/{id}/report` (холбоогүй бол 404). Тайлан =
+  `services/parent_report.build_report` (цэвэр функц): 14 өдрийн идэвх, 30 өдрийн дундаж эзэмшил, алдааны төрөл,
+  анхаарах сэдэв, дүрэмт зөвлөмж (≤4). Өдрийг УБ цагаар (UTC+8). Frontend `/parent` + `components/Charts.tsx` (SVG,
+  палитр зөв `#1f8159` / буруу `#c4812f` — dataviz validator PASS), сурагчийн `/progress`-д `ParentLink`.
 - `uploads.py` FR-03/04: `POST /uploads` (multipart jpg/png ≤10MB → storage → ML /ocr → /classify),
   `PUT /uploads/{id}` засаад дахин ангилах, `GET /uploads/{id}/image` зөвхөн эзэмшигч, `DELETE` (NFR-06),
   `POST /classify {text}`, `GET /ml/health`. ML унтарсан бол status=failed + гараар бичих (NFR-07).
@@ -127,8 +133,13 @@ ID, код бүгд ML хэсэгтэй нийцдэг (T01-001 … бодлог
 
 FR-01 ✅ FR-02 ✅ FR-05 ✅ FR-06 ✅ FR-08 ✅ FR-09 ✅ FR-10 ✅ FR-11 🟡 (сэдэв сонгох бий, граф зураг үгүй)
 FR-12 🟡 (самбар бий, график үгүй) FR-16 ✅. FR-03 ✅ (OCR нарийвчлал хэмжээгүй) FR-04 ✅ — `ml/service.py` HTTP сервис (8001), backend `services/ml_client.py` + `api/uploads.py`, frontend `/upload`.
-FR-07 ✅ (`services/similar.py`, `/similar`, `bank_steps.py` 200 бодолт). FR-13, FR-14, FR-15 ❌. Дэлгэрэнгүй: docs/gap-analysis.md.
+FR-07 ✅ (`services/similar.py`, `/similar`, `bank_steps.py` 200 бодолт). FR-14 ✅ (2026-10-12). FR-13, FR-15 ❌. Дэлгэрэнгүй: docs/gap-analysis.md.
 
+**Сануулга ба толь (2026-10-12):** `ml/tools/bank_hints.py` (200×3: 1 **Онол** — тодорхойлолт/теорем нөхцөлтэй,
+2 **Арга** — энэ бодлогод хэрэглэх төлөвлөгөө, 3 **Анхаар** — түгээмэл алдаа, шалгах нөхцөл; хариуг хэзээ ч хэлэхгүй,
+≤3 өгүүлбэр, томьёо `$...$`) ба `bank_glossary.py` (168 нэр томьёо, бодлогын `нэр_томьёо` бүгд хамрагдсан) нь
+`bank_data`-гийн сануулга, GLOSSARY-г `build_bank.py`-д орлоно. Frontend сануулгад «Онол/Арга/Анхаар» шошго,
+толийн тайлбарыг KaTeX-ээр. Өөрчилсний дараа: `build_bank.py` → `python -m app.seed` (Supabase-д ч тусад нь).
 Бодлогын сан: 200 (сэдэв бүрт 20) — `ml/tools/bank_data.py` (60) + `bank_data_extra.py` (140),
 `build_bank.py` SymPy 200/200. DB-д seed хийгдсэн. Ангилагч 200 дээр дахин сургагдсан (2026-10-09):
 сэдэв macro-F1 0.931±0.031 (өмнө 0.907), түвшин 0.559 (өмнө 0.412), дэд сэдэв kNN top-1 0.653 (n=176;

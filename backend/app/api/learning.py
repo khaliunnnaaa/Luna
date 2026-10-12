@@ -202,24 +202,7 @@ def submit_attempt(
 @router.get("/me/mastery", response_model=List[MasteryOut])
 def my_mastery(db: Session = Depends(get_db), user: User = Depends(get_current_user)):
     """Бүх сэдвийн эзэмшил. Оролдоогүй сэдэвт BKT-ийн анхны (prior) утгыг харуулна."""
-    rows = mastery_svc.all_for_user(db, user.id)
-    out = []
-    for t in db.scalars(select(Topic).order_by(Topic.grade, Topic.id)):
-        m = rows.get(t.id)
-        p = m.p_mastery if m else mastery_svc.params_for(t.id)["prior"]
-        out.append(
-            MasteryOut(
-                topic_id=t.id,
-                name=t.name,
-                grade=t.grade,
-                p_mastery=round(p, 4),
-                attempts_count=m.attempts_count if m else 0,
-                correct_count=m.correct_count if m else 0,
-                mastered=p >= mastery_svc.MASTERED,
-                prerequisites=[x.id for x in t.prerequisites],
-            )
-        )
-    return out
+    return [MasteryOut(**m) for m in mastery_svc.overview(db, user.id)]
 
 
 @router.get("/me/attempts", response_model=List[AttemptHistoryOut])

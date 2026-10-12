@@ -1,6 +1,7 @@
 from app.models.content import Problem, Term, Topic, topic_prerequisites
 from app.models.learning import (
     Attempt,
+    LinkCode,
     Mastery,
     ParentChildLink,
     PlacementSession,
@@ -11,6 +12,7 @@ from app.models.user import Role, User
 
 __all__ = [
     "Attempt",
+    "LinkCode",
     "Mastery",
     "ParentChildLink",
     "PlacementSession",

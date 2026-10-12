@@ -4,7 +4,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 import app.models  # noqa: F401 — хүснэгтүүдийг Base-д бүртгэнэ
-from app.api import auth, content, health, learning, placement, uploads
+from app.api import auth, content, health, learning, parent, placement, uploads
 from app.core.config import settings
 from app.core.database import init_dev_db
 
@@ -33,6 +33,7 @@ app.include_router(content.router)
 app.include_router(learning.router)
 app.include_router(placement.router)
 app.include_router(uploads.router)
+app.include_router(parent.router)
 
 
 @app.get("/", include_in_schema=False)

@@ -20,6 +20,11 @@ export const ROLE_LABEL: Record<Role, string> = {
   admin: "Админ",
 };
 
+// Нэвтэрсний дараах нүүр хуудас эрхээс хамаарна
+export function homeFor(role: Role): string {
+  return role === "admin" ? "/admin/problems" : role === "parent" ? "/parent" : "/dashboard";
+}
+
 export function getToken(): string | null {
   try {
     return localStorage.getItem(TOKEN_KEY);
@@ -296,3 +301,29 @@ export async function uploadImage(file: File): Promise<UploadDetail> {
 export function uploadImageUrl(id: number): string {
   return `${API_URL}/uploads/${id}/image`;
 }
+
+// ---------- Эцэг эх (FR-14) ----------
+export type Person = { id: number; full_name: string };
+export type LinkCode = { code: string; expires_at: string };
+
+export type ParentReport = {
+  child: Person;
+  summary: {
+    topics_total: number;
+    topics_mastered: number;
+    attempts_total: number;
+    attempts_7d: number;
+    correct_7d: number;
+    accuracy_7d: number | null;
+    active_days_14: number;
+    days_since_active: number | null;
+    placement_done: boolean;
+  };
+  activity: { date: string; correct: number; wrong: number }[];
+  trend: { date: string; avg_mastery: number }[];
+  mastery: MasteryItem[];
+  errors: { type: string; label: string; count: number }[];
+  hints_avg: number | null;
+  focus: { topic_id: string; name: string; p_mastery: number; accuracy: number; weak_prerequisites: string[] }[];
+  tips: { kind: "start" | "habit" | "focus" | "error" | "hints" | "praise"; title: string; text: string }[];
+};

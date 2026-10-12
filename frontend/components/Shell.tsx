@@ -4,16 +4,18 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
-import { getToken, logout, me, ROLE_LABEL, User } from "@/lib/api";
+import { getToken, homeFor, logout, me, ROLE_LABEL, User } from "@/lib/api";
 
 // Сурагчийн бүх хуудсанд нийтлэг толгой (лого, цэс, бүртгэл) ба хөл.
 // Нэвтрээгүй бол /login руу шилжүүлнэ.
-const NAV = [
+type NavItem = { href: string; label: string; match: string[] };
+const STUDENT_NAV: NavItem[] = [
   { href: "/dashboard", label: "Нүүр", match: ["/dashboard"] },
   { href: "/practice", label: "Дасгал", match: ["/practice", "/problems"] },
   { href: "/upload", label: "Бодлого оруулах", match: ["/upload", "/similar"] },
   { href: "/progress", label: "Миний ахиц", match: ["/progress", "/placement"] },
 ];
+const PARENT_NAV: NavItem[] = [{ href: "/parent", label: "Хүүхдийн ахиц", match: ["/parent"] }];
 
 export default function Shell({ children }: { children: React.ReactNode }) {
   const router = useRouter();
@@ -44,11 +46,11 @@ export default function Shell({ children }: { children: React.ReactNode }) {
         Үндсэн агуулга руу
       </a>
       <header className="top">
-        <Link href="/dashboard" className="logo" aria-label="алхам — нүүр">
+        <Link href={user ? homeFor(user.role) : "/dashboard"} className="logo" aria-label="алхам — нүүр">
           алхам
         </Link>
         <nav className="menu" aria-label="Үндсэн цэс">
-          {NAV.map((n) => {
+          {(user?.role === "parent" ? PARENT_NAV : user ? STUDENT_NAV : []).map((n) => {
             const current = n.match.some((m) => pathname.startsWith(m));
             return (
               <Link

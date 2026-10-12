@@ -1,16 +1,17 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 
 import Shell, { Loading } from "@/components/Shell";
 import { api, getToken, MasteryItem, me, PlacementState, User } from "@/lib/api";
 
 const pct = (x: number) => Math.round(x * 100);
-const two = (n: number) => String(n).padStart(2, "0");
 
 // Нүүр = нэг асуулт: «Одоо юу хийх вэ?». Статистик, бүх сэдвийн эзэмшил → /progress.
 export default function DashboardPage() {
+  const router = useRouter();
   const [user, setUser] = useState<User | null>(null);
   const [mastery, setMastery] = useState<MasteryItem[] | null>(null);
   const [placement, setPlacement] = useState<PlacementState | null>(null);
@@ -20,6 +21,10 @@ export default function DashboardPage() {
     if (!getToken()) return; // Shell /login руу шилжүүлнэ
     me()
       .then((u) => {
+        if (u.role === "parent") {
+          router.replace("/parent"); // эцэг эхийн нүүр — хүүхдийн ахиц (FR-14)
+          return;
+        }
         setUser(u);
         if (u.role === "student") {
           api.get<MasteryItem[]>("/me/mastery").then(setMastery).catch((e) => setError(e.message));
@@ -27,7 +32,7 @@ export default function DashboardPage() {
         }
       })
       .catch(() => {});
-  }, []);
+  }, [router]);
 
   // Дараа нь сурах сэдэв: эзэмшээгүй, урьдач сэдвүүд нь бүгд эзэмшигдсэн (recommender-тэй ижил санаа)
   const upNext = useMemo(() => {
@@ -58,7 +63,7 @@ export default function DashboardPage() {
           <div className="layout">
             {needsPlacement ? (
               <div className="card practice">
-                <span className="num">01 — ЭХНИЙ АЛХАМ</span>
+                <span className="num">Эхний алхам</span>
                 <h3>Эхлээд түвшнээ тогтооё.</h3>
                 <p>
                   {placement?.status === "active"
@@ -73,7 +78,7 @@ export default function DashboardPage() {
               </div>
             ) : (
               <div className="card practice">
-                <span className="num">01 — ӨНӨӨДРИЙН ДАСГАЛ</span>
+                <span className="num">Өнөөдрийн дасгал</span>
                 <h3>Танд тохирох бодлогоос эхэлье.</h3>
                 <p>Систем таны эзэмшлийг харж, хамгийн хэрэгтэй бодлогыг сонгоно. Гацвал сануулга авна.</p>
                 <div className="actions">
@@ -105,7 +110,7 @@ export default function DashboardPage() {
                   href={`/practice?topic=${encodeURIComponent(m.topic_id)}`}
                   className="note-line"
                 >
-                  <span className="note-num">{two(i + 1)}</span>
+                  <span className="note-num">{i + 1}</span>
                   <div>
                     <b>{m.name}</b>
                     <p>{m.attempts_count === 0 ? "Шинэ сэдэв" : `Эзэмшил ${pct(m.p_mastery)}%`}</p>
@@ -123,14 +128,6 @@ export default function DashboardPage() {
             </aside>
           </div>
         </>
-      )}
-
-      {user?.role === "parent" && (
-        <div className="page-head">
-          <div className="eyebrow">Эцэг эхийн булан</div>
-          <h1>Сайн уу, {firstName}</h1>
-          <p>Хүүхдийнхээ ахиц, сул талыг энд харах боломж удахгүй нэмэгдэнэ.</p>
-        </div>
       )}
 
       {user?.role === "admin" && (

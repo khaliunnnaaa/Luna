@@ -34,7 +34,7 @@ export default function RegisterPage() {
     try {
       await register({ email: email.trim(), password, full_name: fullName.trim(), role });
       // Шинэ сурагч эхлээд түвшнээ тогтооно
-      router.push(role === "student" ? "/placement" : "/dashboard");
+      router.push(role === "student" ? "/placement" : "/parent");
     } catch (err) {
       setError((err as Error).message);
     } finally {

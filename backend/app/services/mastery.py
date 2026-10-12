@@ -10,7 +10,7 @@ ML хэсгийн `ml/ml/tracing/mastery.py`-тэй ижил томьёо. Па�
 from datetime import datetime, timezone
 from functools import lru_cache
 from pathlib import Path
-from typing import Dict, Optional
+from typing import Dict, List, Optional
 
 from sqlalchemy import select
 from sqlalchemy.orm import Session
@@ -104,3 +104,28 @@ def set_initial(db: Session, user_id: int, topic_id: str, p: float) -> Mastery:
     m = get_or_create(db, user_id, topic_id)
     m.p_mastery = min(max(p, EPS), 1 - EPS)
     return m
+
+
+def overview(db: Session, user_id: int) -> List[dict]:
+    """Бүх сэдвийн эзэмшил (сурагчийн /me/mastery, эцэг эхийн тайлан FR-14).
+    Оролдоогүй сэдэвт BKT-ийн анхны (prior) утгыг харуулна."""
+    from app.models.content import Topic  # тойрог import-оос сэргийлнэ
+
+    rows = all_for_user(db, user_id)
+    out = []
+    for t in db.scalars(select(Topic).order_by(Topic.grade, Topic.id)):
+        m = rows.get(t.id)
+        p = m.p_mastery if m else params_for(t.id)["prior"]
+        out.append(
+            {
+                "topic_id": t.id,
+                "name": t.name,
+                "grade": t.grade,
+                "p_mastery": round(p, 4),
+                "attempts_count": m.attempts_count if m else 0,
+                "correct_count": m.correct_count if m else 0,
+                "mastered": p >= MASTERED,
+                "prerequisites": [x.id for x in t.prerequisites],
+            }
+        )
+    return out

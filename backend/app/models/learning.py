@@ -5,6 +5,7 @@
 - term_clicks         сурагч аль нэр томьёон дээр дарсан (сул талын дохио)
 - uploads             оруулсан бодлогын зураг ба OCR үр дүн
 - parent_child_links  эцэг эх ↔ хүүхэд
+- link_codes          эцэг эхийг холбох нэг удаагийн код (FR-14)
 """
 
 from datetime import datetime, timezone
@@ -93,6 +94,19 @@ class ParentChildLink(Base):
         ForeignKey("users.id", ondelete="CASCADE"), primary_key=True
     )
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
+
+
+class LinkCode(Base):
+    """FR-14: сурагч үүсгэсэн нэг удаагийн код — эцэг эх оруулж хүүхэдтэйгээ холбогдоно.
+    Код 48 цаг хүчинтэй; ашигласны дараа устгана. Сурагч бүрт нэг идэвхтэй код."""
+
+    __tablename__ = "link_codes"
+
+    code: Mapped[str] = mapped_column(String(12), primary_key=True)
+    child_id: Mapped[int] = mapped_column(
+        ForeignKey("users.id", ondelete="CASCADE"), unique=True, index=True
+    )
+    expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
 
 
 class PlacementSession(Base):

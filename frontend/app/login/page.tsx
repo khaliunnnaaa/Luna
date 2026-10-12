@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { FormEvent, useEffect, useState } from "react";
 
 import AuthLayout, { PasswordInput } from "@/components/AuthLayout";
-import { getToken, login } from "@/lib/api";
+import { getToken, homeFor, login } from "@/lib/api";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -25,7 +25,7 @@ export default function LoginPage() {
     setLoading(true);
     try {
       const u = await login(email.trim(), password);
-      router.push(u.role === "admin" ? "/admin/problems" : "/dashboard");
+      router.push(homeFor(u.role));
     } catch (err) {
       setError((err as Error).message);
     } finally {
