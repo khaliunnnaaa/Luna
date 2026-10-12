@@ -4,7 +4,13 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { FormEvent, useState } from "react";
 
+import AuthLayout, { PasswordInput } from "@/components/AuthLayout";
 import { register, Role } from "@/lib/api";
+
+const ROLES: { value: Role; label: string; note: string }[] = [
+  { value: "student", label: "Сурагч", note: "Бодлого бодож сурна" },
+  { value: "parent", label: "Эцэг эх", note: "Хүүхдийнхээ ахицыг харна" },
+];
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -15,6 +21,8 @@ export default function RegisterPage() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
+  const pwShort = password.length > 0 && password.length < 8;
+
   async function onSubmit(e: FormEvent) {
     e.preventDefault();
     setError("");
@@ -24,8 +32,9 @@ export default function RegisterPage() {
     }
     setLoading(true);
     try {
-      await register({ email, password, full_name: fullName, role });
-      router.push("/dashboard");
+      await register({ email: email.trim(), password, full_name: fullName.trim(), role });
+      // Шинэ сурагч эхлээд түвшнээ тогтооно
+      router.push(role === "student" ? "/placement" : "/dashboard");
     } catch (err) {
       setError((err as Error).message);
     } finally {
@@ -34,30 +43,36 @@ export default function RegisterPage() {
   }
 
   return (
-    <main className="page">
-      <form className="card" onSubmit={onSubmit}>
+    <AuthLayout>
+      <form className="auth-form" onSubmit={onSubmit}>
+        <div className="eyebrow">Шинэ бүртгэл</div>
         <h1>Бүртгүүлэх</h1>
-        <p className="subtitle">Хэдхэн секундэд бүртгэлээ үүсгээрэй.</p>
+        <p className="subtitle">Хэдхэн секунд. Дараа нь 10 минутын түвшин тогтоох тестээр эхэлнэ.</p>
 
-        {error && <div className="error">{error}</div>}
+        {error && (
+          <div className="error" role="alert">
+            {error}
+          </div>
+        )}
 
         <div className="field">
-          <label>Би</label>
-          <div className="roles">
-            <button
-              type="button"
-              className={`role ${role === "student" ? "active" : ""}`}
-              onClick={() => setRole("student")}
-            >
-              Сурагч
-            </button>
-            <button
-              type="button"
-              className={`role ${role === "parent" ? "active" : ""}`}
-              onClick={() => setRole("parent")}
-            >
-              Эцэг эх
-            </button>
+          <span className="field-label" id="role-label" style={{ fontSize: 13, fontWeight: 700 }}>
+            Би
+          </span>
+          <div className="roles" role="radiogroup" aria-labelledby="role-label">
+            {ROLES.map((r) => (
+              <button
+                key={r.value}
+                type="button"
+                role="radio"
+                aria-checked={role === r.value}
+                className={`role ${role === r.value ? "active" : ""}`}
+                onClick={() => setRole(r.value)}
+              >
+                {r.label}
+                <small>{r.note}</small>
+              </button>
+            ))}
           </div>
         </div>
 
@@ -77,6 +92,7 @@ export default function RegisterPage() {
           <input
             id="email"
             type="email"
+            inputMode="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
@@ -86,25 +102,32 @@ export default function RegisterPage() {
 
         <div className="field">
           <label htmlFor="password">Нууц үг</label>
-          <input
+          <PasswordInput
             id="password"
-            type="password"
             value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
+            onChange={setPassword}
             autoComplete="new-password"
+            describedBy="pw-hint"
           />
-          <span className="hint">Дор хаяж 8 тэмдэгт</span>
+          <span id="pw-hint" className="hint" style={pwShort ? { color: "var(--error)" } : undefined}>
+            {pwShort ? `Дахиад ${8 - password.length} тэмдэгт` : "Дор хаяж 8 тэмдэгт"}
+          </span>
         </div>
 
-        <button className="btn" type="submit" disabled={loading}>
-          {loading ? "Түр хүлээнэ үү..." : "Бүртгүүлэх"}
+        <button className="btn rust block" type="submit" disabled={loading}>
+          {loading ? (
+            <>
+              <span className="spinner" aria-hidden /> Бүртгэж байна...
+            </>
+          ) : (
+            "Бүртгүүлэх →"
+          )}
         </button>
 
         <p className="switch">
           Бүртгэлтэй юу? <Link href="/login">Нэвтрэх</Link>
         </p>
       </form>
-    </main>
+    </AuthLayout>
   );
 }

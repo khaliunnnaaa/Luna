@@ -2,9 +2,10 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { FormEvent, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
 
-import { login } from "@/lib/api";
+import AuthLayout, { PasswordInput } from "@/components/AuthLayout";
+import { getToken, login } from "@/lib/api";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -13,13 +14,18 @@ export default function LoginPage() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
+  // Аль хэдийн нэвтэрсэн бол шууд самбар руу
+  useEffect(() => {
+    if (getToken()) router.replace("/dashboard");
+  }, [router]);
+
   async function onSubmit(e: FormEvent) {
     e.preventDefault();
     setError("");
     setLoading(true);
     try {
-      await login(email, password);
-      router.push("/dashboard");
+      const u = await login(email.trim(), password);
+      router.push(u.role === "admin" ? "/admin/problems" : "/dashboard");
     } catch (err) {
       setError((err as Error).message);
     } finally {
@@ -28,45 +34,51 @@ export default function LoginPage() {
   }
 
   return (
-    <main className="page">
-      <form className="card" onSubmit={onSubmit}>
+    <AuthLayout>
+      <form className="auth-form" onSubmit={onSubmit}>
+        <div className="eyebrow">Тавтай морил</div>
         <h1>Нэвтрэх</h1>
-        <p className="subtitle">Тавтай морил! Үргэлжлүүлэн сурцгаая.</p>
+        <p className="subtitle">Өчигдөр зогссон газраасаа үргэлжлүүлье.</p>
 
-        {error && <div className="error">{error}</div>}
+        {error && (
+          <div className="error" role="alert">
+            {error}
+          </div>
+        )}
 
         <div className="field">
           <label htmlFor="email">Имэйл</label>
           <input
             id="email"
             type="email"
+            inputMode="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
             autoComplete="email"
+            autoFocus
           />
         </div>
 
         <div className="field">
           <label htmlFor="password">Нууц үг</label>
-          <input
-            id="password"
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-            autoComplete="current-password"
-          />
+          <PasswordInput id="password" value={password} onChange={setPassword} autoComplete="current-password" />
         </div>
 
-        <button className="btn" type="submit" disabled={loading}>
-          {loading ? "Түр хүлээнэ үү..." : "Нэвтрэх"}
+        <button className="btn rust block" type="submit" disabled={loading}>
+          {loading ? (
+            <>
+              <span className="spinner" aria-hidden /> Нэвтэрч байна...
+            </>
+          ) : (
+            "Нэвтрэх →"
+          )}
         </button>
 
         <p className="switch">
           Бүртгэлгүй юу? <Link href="/register">Бүртгүүлэх</Link>
         </p>
       </form>
-    </main>
+    </AuthLayout>
   );
 }

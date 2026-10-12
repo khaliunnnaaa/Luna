@@ -5,6 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 import ProblemSolver from "@/components/ProblemSolver";
+import Shell, { Loading, PageHead } from "@/components/Shell";
 import { api, getToken, ProblemStudent } from "@/lib/api";
 
 // Тодорхой нэг бодлогыг бодох (холбоосоор орж ирэх, түүхээс дахин бодох).
@@ -15,30 +16,26 @@ export default function ProblemPage() {
   const [error, setError] = useState("");
 
   useEffect(() => {
-    if (!getToken()) {
-      router.replace("/login");
-      return;
-    }
+    if (!getToken()) return; // Shell /login руу шилжүүлнэ
     api
       .get<ProblemStudent>(`/problems/${id}`)
       .then(setProblem)
       .catch((e) => setError(e.message));
-  }, [id, router]);
+  }, [id]);
 
   return (
-    <main className="student">
-      <div className="student-top">
-        <Link href="/dashboard" className="link">
-          ← Самбар
-        </Link>
-        <h1>Бодлого {problem?.code ? `· ${problem.code}` : ""}</h1>
-      </div>
-      {error && <div className="error">{error}</div>}
-      {problem && (
-        <div className="card wide">
-          <ProblemSolver problem={problem} onNext={() => router.push("/practice")} />
+    <Shell>
+      <Link href="/dashboard" className="back">
+        ← Нүүр рүү
+      </Link>
+      <PageHead eyebrow={problem ? `Бодлого / ${problem.topic_name}` : "Бодлого"} title="Хамтдаа бодъё." />
+      {error && (
+        <div className="error" role="alert">
+          {error}
         </div>
       )}
-    </main>
+      {!problem && !error && <Loading />}
+      {problem && <ProblemSolver problem={problem} onNext={() => router.push("/practice")} />}
+    </Shell>
   );
 }

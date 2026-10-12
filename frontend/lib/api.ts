@@ -135,6 +135,7 @@ export type Problem = {
   statement: string;
   answers: string[];
   hints: string[];
+  solution_steps: string[];
   common_mistakes: string | null;
   terms: string[];
   source: string | null;
@@ -239,6 +240,7 @@ export type UploadDetail = {
   ocr_latex: string | null;
   edited_text: string | null;
   predicted_topic: string | null;
+  outcome: "solved" | "unsolved" | null;
   topic_name: string | null;
   ml_available: boolean;
   message: string;
@@ -253,6 +255,20 @@ export type ClassifyResult = {
   confidence: number | null;
   subtopics: string[];
   terms: string[];
+};
+
+export type SimilarProblem = {
+  topic_id: string;
+  topic_name: string;
+  problem_id: number;
+  code: string | null;
+  subtopic: string | null;
+  difficulty: number;
+  statement: string;
+  terms: string[];
+  steps: string[];
+  reason: string;
+  ml_available: boolean;
 };
 
 export type MlHealth = { available: boolean; classifier: boolean; ocr: boolean };

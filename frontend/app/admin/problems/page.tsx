@@ -13,6 +13,7 @@ type Form = {
   statement: string;
   answers: string; // мөр бүрт нэг хариу
   hints: [string, string, string];
+  solution_steps: string; // мөр бүрт нэг алхам (FR-07)
   common_mistakes: string;
   terms: string; // ";"-ээр тусгаарлана
   source: string;
@@ -26,6 +27,7 @@ const EMPTY: Form = {
   statement: "",
   answers: "",
   hints: ["", "", ""],
+  solution_steps: "",
   common_mistakes: "",
   terms: "",
   source: "",
@@ -45,6 +47,7 @@ function toForm(p: Problem): Form {
     statement: p.statement,
     answers: p.answers.join("\n"),
     hints: [h[0], h[1], h[2]],
+    solution_steps: (p.solution_steps ?? []).join("\n"),
     common_mistakes: p.common_mistakes ?? "",
     terms: p.terms.join("; "),
     source: p.source ?? "",
@@ -102,6 +105,7 @@ export default function ProblemsPage() {
       statement: form.statement,
       answers: form.answers.split("\n"),
       hints: form.hints,
+      solution_steps: form.solution_steps.split("\n"),
       common_mistakes: form.common_mistakes || null,
       terms: form.terms.split(";"),
       source: form.source || null,
@@ -214,6 +218,16 @@ export default function ProblemsPage() {
           ))}
 
           <label className="full">
+            Бодолтын алхмууд — мөр бүрт нэг (FR-07: ижил төстэй бодлогоор тайлбарлахад харуулна)
+            <textarea
+              value={form.solution_steps}
+              onChange={(e) => set("solution_steps", e.target.value)}
+              placeholder={"Виет: үржвэр 12, нийлбэр 7.\n$3 \\cdot 4 = 12$, $3 + 4 = 7$.\n$x = 3$; $x = 4$."}
+              rows={4}
+            />
+          </label>
+
+          <label className="full">
             Түгээмэл алдаа (заавал биш)
             <input
               value={form.common_mistakes}
@@ -269,6 +283,7 @@ export default function ProblemsPage() {
                 <span>Түвшин: {LEVELS[p.difficulty] ?? p.difficulty}</span>
                 <span>Хариу: {p.answers.join(", ")}</span>
                 <span>Сануулга: {p.hints.length}/3</span>
+                <span>Алхам: {p.solution_steps?.length ?? 0}</span>
                 {p.code && <span>#{p.code}</span>}
               </div>
             </div>

@@ -30,12 +30,17 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       });
   }, [router]);
 
-  if (!user) return <main className="page"><p className="subtitle">Ачаалж байна...</p></main>;
+  if (!user) return <main className="admin"><p className="subtitle">Ачаалж байна...</p></main>;
 
   return (
     <main className="admin">
       <div className="admin-top">
-        <h1>Админ · Контент удирдлага</h1>
+        <div>
+          <Link href="/dashboard" className="logo">
+            алхам
+          </Link>
+          <h1 style={{ marginTop: 6 }}>Контент удирдлага</h1>
+        </div>
         <button
           className="btn secondary small"
           onClick={() => {

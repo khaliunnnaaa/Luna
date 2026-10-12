@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useEffect, useMemo, useState } from "react";
+import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
 
 import MathText from "@/components/MathText";
 import { api, AttemptResult, DIFFICULTY_LABEL, Hint, ProblemStudent, TermPublic } from "@/lib/api";
@@ -10,6 +10,17 @@ type Props = {
   reason?: string; // FR-09: яагаад энэ бодлогыг санал болгосон
   onNext?: () => void; // "Дараагийн бодлого" дарахад
 };
+
+// Хариуны талбарт хурдан оруулах тэмдэгтүүд (SymPy хэлбэр)
+const SNIPPETS = [
+  { label: "√", insert: "sqrt()", title: "Квадрат язгуур: sqrt(2)" },
+  { label: "x²", insert: "^2", title: "Зэрэг: x^2" },
+  { label: "π", insert: "pi", title: "Пи тоо" },
+  { label: "a/b", insert: "/", title: "Бутархай: 1/2" },
+  { label: "[ , ]", insert: "[, ]", title: "Олон шийд: [3, 4]" },
+  { label: "( , )", insert: "(, )", title: "Цэг: (2, -3)" },
+  { label: "−", insert: "-", title: "Хасах" },
+];
 
 // Бодлогын өгүүлбэр дэх нэр томьёог дарж болохоор тодруулна (FR-05).
 // Томьёо ($...$) хэсэгт хүрэхгүй.
@@ -72,6 +83,7 @@ export default function ProblemSolver({ problem, reason, onNext }: Props) {
   const [term, setTerm] = useState<{ term: string; explanation: string | null; example: string | null } | null>(null);
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   // Бодлого солигдоход төлөвийг цэвэрлэнэ
   useEffect(() => {
@@ -132,101 +144,180 @@ export default function ProblemSolver({ problem, reason, onNext }: Props) {
     }
   }
 
+  // Хариу бичихэд хэрэгтэй тэмдэгтүүдийг курсорын байрлалд оруулна
+  function insert(snippet: string) {
+    const el = inputRef.current;
+    if (!el) return setAnswer((a) => a + snippet);
+    const start = el.selectionStart ?? answer.length;
+    const end = el.selectionEnd ?? answer.length;
+    const next = answer.slice(0, start) + snippet + answer.slice(end);
+    setAnswer(next);
+    // "sqrt()" бол хаалтын дотор, "[, ]" бол эхний элементийн байранд курсор тавина
+    const offset = snippet.includes(",")
+      ? snippet.indexOf(",")
+      : snippet.endsWith("()")
+        ? snippet.length - 1
+        : snippet.length;
+    const caret = start + offset;
+    requestAnimationFrame(() => {
+      el.focus();
+      el.setSelectionRange(caret, caret);
+    });
+  }
+
   const pct = (x: number) => Math.round(x * 100);
+  const hintsLeft = problem.hint_count - hints.length;
 
   return (
     <div className="solver">
-      {reason && <p className="reason">💡 {reason}</p>}
+      {reason && <p className="reason">{reason}</p>}
 
-      <div className="solver-head">
-        <span className="badge">{problem.topic_name}</span>
-        <span className="badge muted">
-          {problem.difficulty} · {DIFFICULTY_LABEL[problem.difficulty]}
-        </span>
-        {problem.subtopic && <span className="badge muted">{problem.subtopic}</span>}
-        {solved && <span className="badge ok">✓ бодсон</span>}
-      </div>
-
-      <div className="statement">
-        <TermHighlighter text={problem.statement} terms={highlight} onTerm={showTerm} />
-      </div>
-      <p className="hint">Ойлгохгүй үг дээрээ дарвал тайлбар гарна.</p>
-
-      {term && (
-        <div className="term-box">
-          <strong>{term.term}</strong>
-          {term.explanation ? (
-            <>
-              <p>{term.explanation}</p>
-              {term.example && (
-                <p className="hint">
-                  Жишээ: <MathText text={term.example} />
-                </p>
-              )}
-            </>
-          ) : (
-            <p className="hint">Энэ үгийн тайлбар толинд хараахан алга. Бүртгэж авлаа.</p>
-          )}
-          <button type="button" className="link" onClick={() => setTerm(null)}>
-            хаах
-          </button>
-        </div>
-      )}
-
-      {hints.length > 0 && (
-        <ol className="hints">
-          {hints.map((h) => (
-            <li key={h.level}>
-              <MathText text={h.hint} />
-            </li>
-          ))}
-        </ol>
-      )}
-
-      {!result?.is_correct && hints.length < problem.hint_count && (
-        <button type="button" className="btn secondary small" onClick={nextHint}>
-          {hints.length === 0 ? "Сануулга авах" : `Дараагийн сануулга (${hints.length + 1}/${problem.hint_count})`}
-        </button>
-      )}
-
-      <form onSubmit={submit} className="answer-form">
-        <div className="field">
-          <label htmlFor="answer">Таны хариу</label>
-          <input
-            id="answer"
-            value={answer}
-            onChange={(e) => setAnswer(e.target.value)}
-            placeholder="жишээ: 3, 1/2, [3, 4], 2*sqrt(2)"
-            autoComplete="off"
-            disabled={busy}
-          />
-          <span className="hint">
-            Олон шийдтэй бол [3, 4], цэг бол (2, -3) гэж бич. x^2, sqrt(2), pi ашиглаж болно.
+      <div className="card question">
+        <div className="indexline">
+          <span>{problem.code ? `Бодлого ${problem.code}` : "Бодлого"}</span>
+          <span className="tags">
+            <span className="badge">{problem.topic_name}</span>
+            <span className="badge muted">{DIFFICULTY_LABEL[problem.difficulty]}</span>
+            {problem.subtopic && <span className="badge muted">{problem.subtopic}</span>}
+            {solved && <span className="badge ok">✓ бодсон</span>}
           </span>
         </div>
-        {error && <div className="error">{error}</div>}
-        <button className="btn" disabled={busy || !answer.trim()}>
-          {busy ? "Шалгаж байна..." : "Шалгах"}
-        </button>
-      </form>
 
-      {result && (
-        <div className={`result ${result.is_correct ? "ok" : "bad"}`}>
-          <p className="result-text">{result.feedback}</p>
-          <p className="hint">
-            Оролдлого: {attempts} · {problem.topic_name} эзэмшил {pct(result.mastery_before)}% →{" "}
-            <strong>{pct(result.mastery_after)}%</strong>
-          </p>
-          <div className="bar">
-            <div className="bar-fill" style={{ width: `${pct(result.mastery_after)}%` }} />
+        <div className="solver" style={{ marginTop: 22 }}>
+          <div className="statement">
+            <TermHighlighter text={problem.statement} terms={highlight} onTerm={showTerm} />
           </div>
-          {result.is_correct && onNext && (
-            <button type="button" className="btn" onClick={onNext} style={{ marginTop: 12 }}>
-              Дараагийн бодлого →
-            </button>
+          {highlight.length > 0 && (
+            <p className="hint" style={{ margin: 0 }}>
+              Тасархай зураастай үг дээр дарвал тайлбар гарна.
+            </p>
+          )}
+
+          {term && (
+            <div className="term-box" role="note">
+              <div className="head">
+                <strong>{term.term}</strong>
+                <button type="button" className="link" onClick={() => setTerm(null)}>
+                  Хаах ✕
+                </button>
+              </div>
+              {term.explanation ? (
+                <>
+                  <p>{term.explanation}</p>
+                  {term.example && (
+                    <p className="hint">
+                      Жишээ: <MathText text={term.example} />
+                    </p>
+                  )}
+                </>
+              ) : (
+                <p className="hint">Энэ үгийн тайлбар толинд хараахан алга. Багшид мэдэгдэхээр бүртгэж авлаа.</p>
+              )}
+            </div>
+          )}
+
+          {hints.length > 0 && (
+            <ol className="hints" aria-live="polite">
+              {hints.map((h) => (
+                <li key={h.level}>
+                  <MathText text={h.hint} />
+                </li>
+              ))}
+            </ol>
+          )}
+
+          {!result?.is_correct && problem.hint_count > 0 && (
+            <div>
+              <button
+                type="button"
+                className="btn light small"
+                onClick={nextHint}
+                disabled={hintsLeft <= 0}
+              >
+                {hintsLeft <= 0
+                  ? "Сануулга дууссан"
+                  : hints.length === 0
+                    ? `Сануулга авах (${problem.hint_count} байна)`
+                    : `Дараагийн сануулга ${hints.length + 1}/${problem.hint_count}`}
+              </button>
+            </div>
+          )}
+
+          <form onSubmit={submit} className="answer-form answer-box">
+            <div className="field">
+              <label htmlFor="answer">Таны хариу</label>
+              <div className="answer-input">
+                <input
+                  id="answer"
+                  ref={inputRef}
+                  value={answer}
+                  onChange={(e) => setAnswer(e.target.value)}
+                  placeholder="жишээ: 3, 1/2, [3, 4], 2*sqrt(2)"
+                  autoComplete="off"
+                  autoCapitalize="off"
+                  spellCheck={false}
+                  disabled={busy}
+                  aria-describedby="answer-help"
+                />
+                <button className="btn rust" disabled={busy || !answer.trim()}>
+                  {busy ? (
+                    <>
+                      <span className="spinner" aria-hidden /> Шалгаж байна
+                    </>
+                  ) : (
+                    "Шалгах →"
+                  )}
+                </button>
+              </div>
+              <div className="chips" aria-label="Тэмдэгт оруулах">
+                {SNIPPETS.map((s) => (
+                  <button
+                    key={s.label}
+                    type="button"
+                    className="chip"
+                    onClick={() => insert(s.insert)}
+                    title={s.title}
+                    disabled={busy}
+                  >
+                    {s.label}
+                  </button>
+                ))}
+              </div>
+              <span id="answer-help" className="hint">
+                Олон шийдтэй бол [3, 4], цэг бол (2, -3) гэж бичнэ. Enter дарж шалгана.
+              </span>
+            </div>
+            {error && (
+              <div className="error" role="alert">
+                {error}
+              </div>
+            )}
+          </form>
+
+          {result && (
+            <div className={`result ${result.is_correct ? "ok" : "bad"}`} aria-live="polite">
+              <p className="result-text">{result.feedback}</p>
+              <p className="hint" style={{ margin: 0 }}>
+                {attempts}-р оролдлого · {problem.topic_name}: {pct(result.mastery_before)}% →{" "}
+                <strong>{pct(result.mastery_after)}%</strong>
+              </p>
+              <div className="bar">
+                <div className="bar-fill" style={{ width: `${pct(result.mastery_after)}%` }} />
+              </div>
+              {!result.is_correct && hintsLeft > 0 && (
+                <p className="hint" style={{ margin: "8px 0 0" }}>
+                  Гацсан бол сануулга аваад дахин оролдоорой — алдаа бол дараагийн алхмын дохио.
+                </p>
+              )}
+              {result.is_correct && onNext && (
+                <button type="button" className="btn" onClick={onNext} style={{ marginTop: 14 }} autoFocus>
+                  Дараагийн бодлого →
+                </button>
+              )}
+            </div>
           )}
         </div>
-      )}
+      </div>
     </div>
   );
 }

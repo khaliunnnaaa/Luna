@@ -1,15 +1,14 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { SyntheticEvent, useCallback, useEffect, useState } from "react";
 
 import MathText from "@/components/MathText";
+import Shell, { Loading, PageHead } from "@/components/Shell";
 import { api, DIFFICULTY_LABEL, getToken, PlacementAnswer, PlacementState } from "@/lib/api";
 
 // FR-02: 8–10 асуулттай, 10 минутаас хэтрэхгүй adaptive тест.
 export default function PlacementPage() {
-  const router = useRouter();
   const [state, setState] = useState<PlacementState | null>(null);
   const [answer, setAnswer] = useState("");
   const [last, setLast] = useState<PlacementAnswer | null>(null);
@@ -28,12 +27,9 @@ export default function PlacementPage() {
   }, []);
 
   useEffect(() => {
-    if (!getToken()) {
-      router.replace("/login");
-      return;
-    }
+    if (!getToken()) return; // Shell /login руу шилжүүлнэ
     load();
-  }, [load, router]);
+  }, [load]);
 
   // Цаг тоолуур; 0 болоход backend-д дуусгана
   useEffect(() => {
@@ -85,52 +81,77 @@ export default function PlacementPage() {
   const pct = (x: number) => Math.round(x * 100);
 
   return (
-    <main className="student">
-      <div className="student-top">
-        <Link href="/dashboard" className="link">
-          ← Самбар
-        </Link>
-        <h1>Түвшин тогтоох тест</h1>
-      </div>
-      {error && <div className="error">{error}</div>}
-      {!state && !error && <p className="subtitle">Ачаалж байна...</p>}
+    <Shell>
+      <Link href="/dashboard" className="back">
+        ← Нүүр рүү
+      </Link>
+      <PageHead eyebrow="Түвшин тогтоох / FR-02" title="Хаанаас эхлэхээ мэдье.">
+        8–10 богино асуулт, 10 минутаас хэтрэхгүй. Энэ нь шалгалт биш — зөвхөн дасгалаа хаанаас
+        эхлэхийг тогтооно.
+      </PageHead>
+      {error && (
+        <div className="error" role="alert">
+          {error}
+        </div>
+      )}
+      {!state && !error && <Loading />}
 
       {state?.status === "none" && (
-        <div className="card wide">
-          <h2>Хаанаас эхлэхээ мэдье</h2>
-          <p>
-            8–10 богино асуулт, 10 минутаас хэтрэхгүй. Мэдэхгүй бол «Мэдэхгүй» гэж дарахад болно —
-            энэ нь шалгалт биш, зөвхөн хаанаас эхлэхийг тогтооно.
-          </p>
-          <button className="btn" onClick={start} disabled={busy}>
-            Эхлэх
+        <div className="card question">
+          <div className="indexline">
+            <span>Эхлэхийн өмнө</span>
+            <span>≈ 10 минут</span>
+          </div>
+          <ul className="steps" style={{ margin: "10px 0 26px" }}>
+            <li className="step">Сэдэв бүрээс нэг асуулт ирнэ. Зөв хариулбал дараагийнх нь хүндэрнэ.</li>
+            <li className="step">Мэдэхгүй бол «Мэдэхгүй» гэж дарахад болно — таамаглах хэрэггүй.</li>
+            <li className="step">Дуусахад сэдэв бүрийн эхлэх түвшин тань тогтоно.</li>
+          </ul>
+          <button className="btn rust" onClick={start} disabled={busy}>
+            {busy ? "Бэлдэж байна..." : "Тест эхлэх →"}
           </button>
         </div>
       )}
 
       {state?.status === "active" && state.question && (
-        <div className="card wide">
-          <div className="placement-top">
-            <span className="badge">
-              {state.index + 1} / {state.total}
+        <div className="card question">
+          <div className="indexline">
+            <span>
+              Асуулт {String(state.index + 1).padStart(2, "0")} / {String(state.total).padStart(2, "0")}
             </span>
-            <span className="badge muted">{state.question.topic_name}</span>
-            <span className="badge muted">{DIFFICULTY_LABEL[state.question.difficulty]}</span>
-            {left !== null && <span className={`timer ${left < 60 ? "warn" : ""}`}>⏱ {mmss(left)}</span>}
+            <span className="tags">
+              <span className="badge muted">{state.question.topic_name}</span>
+              <span className="badge muted">{DIFFICULTY_LABEL[state.question.difficulty]}</span>
+              {left !== null && (
+                <span className={`timer ${left < 60 ? "warn" : ""}`} aria-label="Үлдсэн хугацаа">
+                  {mmss(left)}
+                </span>
+              )}
+            </span>
           </div>
-          <div className="bar" style={{ margin: "12px 0 18px" }}>
+          <div
+            className="bar"
+            style={{ margin: "0 0 22px" }}
+            role="progressbar"
+            aria-valuenow={state.index}
+            aria-valuemin={0}
+            aria-valuemax={state.total}
+            aria-label="Тестийн явц"
+          >
             <div className="bar-fill" style={{ width: `${(state.index / state.total) * 100}%` }} />
           </div>
 
           {last && (
-            <p className={`placement-feedback ${last.correct ? "ok" : ""}`}>{last.feedback}</p>
+            <p className={`placement-feedback ${last.correct ? "ok" : ""}`} aria-live="polite">
+              {last.feedback}
+            </p>
           )}
 
-          <div className="statement">
+          <div className="statement" style={{ margin: "18px 0 22px" }}>
             <MathText text={state.question.statement} />
           </div>
 
-          <form onSubmit={(e) => submit(e, answer)} className="answer-form" style={{ marginTop: 16 }}>
+          <form onSubmit={(e) => submit(e, answer)} className="answer-form answer-box">
             <div className="field">
               <label htmlFor="answer">Хариу</label>
               <input
@@ -139,19 +160,19 @@ export default function PlacementPage() {
                 onChange={(e) => setAnswer(e.target.value)}
                 placeholder="жишээ: 3, 1/2, [3, 4]"
                 autoComplete="off"
+                autoCapitalize="off"
+                spellCheck={false}
                 disabled={busy}
+                autoFocus
+                style={{ fontFamily: "var(--serif)", fontSize: 18 }}
               />
+              <span className="hint">Олон шийдтэй бол [3, 4], цэг бол (2, -3). x^2, sqrt(2), pi.</span>
             </div>
-            <div className="row">
-              <button className="btn" disabled={busy || !answer.trim()}>
-                Хариулах
+            <div className="actions">
+              <button className="btn rust" disabled={busy || !answer.trim()}>
+                Хариулах →
               </button>
-              <button
-                type="button"
-                className="btn secondary"
-                disabled={busy}
-                onClick={(e) => submit(e, "")}
-              >
+              <button type="button" className="btn light" disabled={busy} onClick={(e) => submit(e, "")}>
                 Мэдэхгүй
               </button>
             </div>
@@ -160,38 +181,63 @@ export default function PlacementPage() {
       )}
 
       {state?.status === "done" && (
-        <div className="card wide">
-          <h2>Үр дүн</h2>
-          <p className="subtitle">
-            {state.correct_count} / {state.index} зөв. Сэдэв бүрийн эхлэх түвшин тогтлоо — одоо
-            дасгалаа эндээс эхэлнэ.
-          </p>
-          <ul className="mastery-list">
-            {state.result.map((r) => (
-              <li key={r.topic_id} className="mastery-row static">
-                <div className="mastery-name">
-                  <span>{r.topic_name}</span>
-                  <span className="hint">
-                    түвшин {r.difficulty} · {r.correct ? "зөв ✓" : "буруу ✗"}
-                  </span>
-                </div>
-                <div className="bar">
-                  <div className="bar-fill" style={{ width: `${pct(r.p_mastery)}%` }} />
-                </div>
-                <span className="mastery-pct">{pct(r.p_mastery)}%</span>
-              </li>
-            ))}
-          </ul>
-          <div className="row" style={{ marginTop: 18 }}>
-            <Link href="/practice" className="btn">
-              Дасгал эхлэх →
-            </Link>
-            <button className="btn secondary" onClick={start} disabled={busy}>
-              Дахин өгөх
-            </button>
+        <>
+          <div className="stats" style={{ marginBottom: 40 }}>
+            <div className="stat">
+              <span className="large">{state.correct_count}</span>
+              <span className="caption">Зөв хариулт</span>
+            </div>
+            <div className="stat">
+              <span className="large">{state.index}</span>
+              <span className="caption">Хариулсан асуулт</span>
+            </div>
+            <div className="stat">
+              <span className="large">{state.result.length}</span>
+              <span className="caption">Үнэлсэн сэдэв</span>
+            </div>
           </div>
-        </div>
+          <div className="bottom">
+            <div>
+              <div className="section-label">
+                <h2>Эхлэх түвшин тогтлоо</h2>
+              </div>
+              <p className="muted" style={{ fontSize: 14, lineHeight: 1.9, maxWidth: 440 }}>
+                Сэдэв бүрийн анхны эзэмшил доорх байдлаар тогтлоо. Одоо систем танд тохирох дасгалыг
+                эндээс эхлэн санал болгоно.
+              </p>
+              <div className="actions" style={{ marginTop: 20 }}>
+                <Link href="/practice" className="btn rust">
+                  Дасгал эхлэх →
+                </Link>
+                <button className="btn light" onClick={start} disabled={busy}>
+                  Дахин өгөх
+                </button>
+              </div>
+            </div>
+            <div>
+              <div className="section-label">
+                <h2>Сэдэв бүрээр</h2>
+              </div>
+              <ul className="mastery-list">
+                {state.result.map((r) => (
+                  <li key={r.topic_id} className="mastery-row static">
+                    <div className="mastery-name">
+                      <span>{r.topic_name}</span>
+                      <span className="hint">
+                        {DIFFICULTY_LABEL[r.difficulty]} түвшин · {r.correct ? "зөв ✓" : "буруу"}
+                      </span>
+                    </div>
+                    <div className="bar">
+                      <div className="bar-fill" style={{ width: `${pct(r.p_mastery)}%` }} />
+                    </div>
+                    <span className="mastery-pct">{pct(r.p_mastery)}%</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        </>
       )}
-    </main>
+    </Shell>
   );
 }
