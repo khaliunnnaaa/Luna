@@ -10,7 +10,9 @@ from openpyxl import Workbook
 from openpyxl.styles import Alignment, Font, PatternFill
 from openpyxl.utils import get_column_letter
 
-from bank_data import GLOSSARY, P, TOPICS
+from bank_data import P, TOPICS
+from bank_glossary import GLOSSARY  # мэргэжлийн тайлбартай толь (bank_data.GLOSSARY-г орлоно)
+from bank_hints import HINTS  # Онол / Арга / Анхаар — 3 шатны сануулга (bank_data-гийнхыг орлоно)
 from bank_steps import STEPS
 
 x, y, a, b, k = symbols("x y a b k")
@@ -45,6 +47,7 @@ def main():
         pid = f"{topic}-{i:03d}"
         prereq = dict((t[0], t[3]) for t in TOPICS)[topic]
         steps = " || ".join(st for st in STEPS.get(pid, []) if st)  # FR-07 бодолтын алхмууд
+        hints = HINTS.get(pid, hints)
         rows.append([pid, topic, sub, lvl, text, latex, ans, str(e), prereq, terms,
                      hints[0], hints[1], hints[2], mis, "OK" if ok else "ШАЛГАХ", steps])
     print(f"SymPy шалгалт: {len(P) - len(fails)}/{len(P)} зөв")
