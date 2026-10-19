@@ -11,7 +11,7 @@
 
 from typing import Dict, List, Optional, Tuple
 
-from sqlalchemy import func, select
+from sqlalchemy import case, func, select
 from sqlalchemy.orm import Session
 
 from app.models.content import Problem, Topic
@@ -76,8 +76,10 @@ def pick_problem(
     if not problems:
         return None
     # Сурагчийн оролдлогууд: {problem_id: (зөв бодсон эсэх, хамгийн сүүлийн оролдлогын id)}
+    # PostgreSQL-д max(boolean) байхгүй тул 0/1 болгож нэгтгэнэ
+    solved_any = func.max(case((Attempt.is_correct, 1), else_=0))
     rows = db.execute(
-        select(Attempt.problem_id, func.max(Attempt.is_correct), func.max(Attempt.id))
+        select(Attempt.problem_id, solved_any, func.max(Attempt.id))
         .where(Attempt.user_id == user_id, Attempt.topic_id == topic_id)
         .group_by(Attempt.problem_id)
     ).all()
