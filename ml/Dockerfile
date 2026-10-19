@@ -7,7 +7,11 @@ COPY requirements*.txt ./
 RUN pip install --no-cache-dir -r requirements.txt
 # OCR-той хувилбар (torch ~1 GB): --build-arg WITH_OCR=1
 ARG WITH_OCR=0
-RUN if [ "$WITH_OCR" = "1" ]; then pip install --no-cache-dir -r requirements-ocr.txt; fi
+# torch-ийн CPU хувилбарыг эхэлж суулгана (CUDA-тайгаас хэд дахин бага)
+RUN if [ "$WITH_OCR" = "1" ]; then \
+      pip install --no-cache-dir torch torchvision --index-url https://download.pytorch.org/whl/cpu && \
+      pip install --no-cache-dir -r requirements-ocr.txt; \
+    fi
 COPY . .
 EXPOSE 8001
 CMD ["uvicorn", "service:app", "--host", "0.0.0.0", "--port", "8001"]

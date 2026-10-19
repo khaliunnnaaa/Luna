@@ -13,8 +13,11 @@ services:
       timeout: 3s
       retries: 20
 
+  # Заавал биш: зураг default-аар backend/uploads/-д (S3_ENDPOINT хоосон) эсвэл Supabase Storage-д.
+  # MinIO хэрэгтэй бол: docker compose --profile minio up  (+ .env-д S3_ENDPOINT=http://minio:9000)
   minio:
-    image: minio/minio
+    image: quay.io/minio/minio
+    profiles: [minio]
     command: server /data --console-address ":9001"
     environment:
       MINIO_ROOT_USER: minioadmin
@@ -23,22 +26,33 @@ services:
     volumes: [miniodata:/data]
 
   ml:
-    build: ./ml            # OCR-той: build: {context: ./ml, args: {WITH_OCR: "1"}}
+    # OCR-той (Tesseract mon + pix2tex/torch CPU). OCR-гүй хөнгөн хувилбар: WITH_OCR: "0"
+    build: {context: ./ml, args: {WITH_OCR: "1"}}
     ports: ["8001:8001"]
-    # math-ocr/ модулийг /math-ocr руу (service.py MATH_OCR_DIR-ээр олно)
-    volumes: ["./ml:/app", "./math-ocr:/math-ocr:ro"]
+    # math-ocr/ модулийг /math-ocr руу (service.py MATH_OCR_DIR-ээр олно);
+    # pix2tex жин (~115MB) volume-д — контейнер шинэчлэгдэх бүрд дахин татахгүй
+    volumes:
+      - ./ml:/app
+      - ./math-ocr:/math-ocr:ro
+      - pix2tex:/usr/local/lib/python3.11/site-packages/pix2tex/model/checkpoints
     environment:
       MATH_OCR_DIR: /math-ocr
 
   backend:
     build: ./backend
-    env_file: .env
+    # backend/.env (Supabase DATABASE_URL г.м.) нь үндсэн .env-ийг дарна — нууцыг нэг газар хадгална
+    env_file:
+      - .env
+      - path: backend/.env
+        required: false
+    environment:
+      ML_SERVICE_URL: http://ml:8001
     ports: ["8000:8000"]
     # ./ml → /ml: seed (ml/csv) болон BKT параметр (ml/config) замыг config.py "/ml/..." гэж олно
     volumes: ["./backend:/app", "./ml:/ml:ro"]
     depends_on:
       db: {condition: service_healthy, required: false}  # Supabase үед db асахгүй
-      minio: {condition: service_started}
+      minio: {condition: service_started, required: false}
       ml: {condition: service_started}
 
   frontend:
@@ -51,3 +65,4 @@ services:
 volumes:
   pgdata:
   miniodata:
+  pix2tex:

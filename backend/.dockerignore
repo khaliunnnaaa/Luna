@@ -1,0 +1,11 @@
+# Image-д орох ёсгүй: хостын venv, нууц, локал өгөгдөл
+.venv
+__pycache__
+*.pyc
+.pytest_cache
+.ruff_cache
+.env
+.env.*
+*.db
+*.db.bak*
+uploads/
