@@ -1,0 +1,12 @@
+# Caddy: Let's Encrypt HTTPS автоматаар. {$DOMAIN} = .env.prod-ийн DOMAIN (жишээ: 13-212-1-2.sslip.io)
+{$DOMAIN} {
+	encode gzip
+	# /api/* → backend (prefix-ийг хасна), нэг origin тул CORS асуудалгүй
+	handle_path /api/* {
+		request_body {
+			max_size 12MB
+		}
+		reverse_proxy backend:8000
+	}
+	reverse_proxy frontend:3000
+}

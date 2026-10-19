@@ -1,0 +1,58 @@
+# Production (AWS EC2): docker compose -f docker-compose.prod.yml --env-file .env.prod up -d --build
+# Зөвхөн Caddy (80/443) гадагш нээлттэй; backend, ml, frontend дотоод сүлжээнд.
+# DB = Supabase (backend/.env-ийн DATABASE_URL). Нууцыг .env.prod болон backend/.env-д, git-д оруулахгүй.
+services:
+  caddy:
+    image: caddy:2.8
+    restart: unless-stopped
+    ports: ["80:80", "443:443"]
+    environment:
+      DOMAIN: ${DOMAIN}
+    volumes:
+      - ./deploy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on: [frontend, backend]
+
+  ml:
+    build: {context: ./ml, args: {WITH_OCR: "1"}}
+    restart: unless-stopped
+    volumes:
+      - ./math-ocr:/math-ocr:ro
+      - pix2tex:/usr/local/lib/python3.11/site-packages/pix2tex/model/checkpoints
+    environment:
+      MATH_OCR_DIR: /math-ocr
+      NO_ALBUMENTATIONS_UPDATE: "1"
+
+  backend:
+    build: ./backend
+    restart: unless-stopped
+    env_file:
+      - path: backend/.env
+        required: true
+    environment:
+      ML_SERVICE_URL: http://ml:8001
+      JWT_SECRET: ${JWT_SECRET}
+      CORS_ORIGINS: '["https://${DOMAIN}"]'
+    command: ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000",
+              "--workers", "2", "--proxy-headers", "--forwarded-allow-ips", "*"]
+    # seed (ml/csv) ба BKT параметр (ml/config)-ийг config.py "/ml/..." гэж олно
+    volumes:
+      - ./ml:/ml:ro
+      - uploads:/backend/uploads
+    depends_on: [ml]
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.prod
+      args:
+        NEXT_PUBLIC_API_URL: https://${DOMAIN}/api
+    restart: unless-stopped
+    depends_on: [backend]
+
+volumes:
+  caddy_data:
+  caddy_config:
+  pix2tex:
+  uploads:

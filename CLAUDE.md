@@ -40,8 +40,14 @@ python3 tools/build_bank.py  # бодлогын сан: SymPy шалгалт →
 
 `init_dev_db()` (database.py) зөвхөн SQLite дээр `create_all` хийнэ — dev.db-д хүснэгт өөрөө үүснэ.
 PostgreSQL (docker) дээр зөвхөн Alembic: `backend/docker-entrypoint.sh` → `alembic upgrade head`.
-Docker backend-д `./ml` → `/ml:ro` mount (seed, bkt_params зам). Docker Mac дээр суусан.
+Docker backend-д `./ml` → `/ml:ro` mount (seed, bkt_params зам). Docker Mac дээр суусан. **`docker compose up -d`** (2026-10-12 ажиллуулж шалгасан): backend env = `.env` +
+`backend/.env` (Supabase URL зөвхөн backend/.env-д), ML нь `WITH_OCR=1` (torch CPU, Tesseract mon, pix2tex жин
+`pix2tex` volume-д), MinIO заавал биш (`--profile minio`; Docker Hub-ын `minio/minio` татагдахгүй болсон тул
+`quay.io/minio/minio`), зураг default-аар `backend/uploads/`. `.dockerignore` нь .venv, node_modules, .env-ийг image-с хасна.
 **DB = Supabase** (Session pooler, `?sslmode=require`); локал `db` нь `--profile localdb`.
+**AWS демо (2026-10-19):** `deploy/ec2-create.sh` (Free plan → m7i-flex.large, HOURS=48 дараа өөрөө terminate) →
+`deploy/push.sh` (rsync + `docker-compose.prod.yml`: Caddy HTTPS, `/api/*` → backend, sslip.io домэйн) →
+`deploy/ec2-destroy.sh`. `deploy/.instance` (IP, id) gitignore-д. Ubuntu mirror sync үед apt унадаг тул user-data дахин оролддог.
 Шинэ хүснэгтийн migration-д `ALTER TABLE ... ENABLE ROW LEVEL SECURITY` заавал (0005-г үз). Хүснэгт нэмэхдээ **хоёуланг нь**: model + migration.
 
 ## Өгөгдлийн сан (backend/app/models/)
